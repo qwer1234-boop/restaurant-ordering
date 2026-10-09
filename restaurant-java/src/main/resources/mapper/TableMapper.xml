@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.restaurant.mapper.TableMapper">
+
+    <select id="selectAll" resultType="com.restaurant.entity.DiningTable">
+        SELECT id, table_no, seats, status
+          FROM dining_table
+         ORDER BY table_no ASC
+    </select>
+
+    <select id="selectByTableNo" resultType="com.restaurant.entity.DiningTable">
+        SELECT id, table_no, seats, status
+          FROM dining_table
+         WHERE table_no = #{tableNo}
+    </select>
+
+    <!-- 根据该桌是否还有进行中的订单，重算餐桌占用状态 -->
+    <update id="refreshStatusByActiveOrders">
+        UPDATE dining_table
+           SET status = IF(EXISTS(
+                   SELECT 1 FROM orders o
+                    WHERE o.table_no = dining_table.table_no
+                      AND o.status IN ('待处理', '制作中')
+               ), 1, 0)
+         WHERE table_no = #{tableNo}
+    </update>
+
+</mapper>

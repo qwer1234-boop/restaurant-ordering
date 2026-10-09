@@ -1,0 +1,71 @@
+<!--pages/index/index.wxml 点餐主页-->
+<view class="page">
+
+  <!-- 门店信息条 -->
+  <view class="shop-bar">
+    <text class="shop-name">🍜 美味餐厅（模拟）</text>
+    <text class="shop-tip">堂食 · 免排队</text>
+  </view>
+
+  <view class="main">
+    <!-- 左侧分类栏 -->
+    <scroll-view class="cat-list" scroll-y>
+      <view
+        wx:for="{{categories}}"
+        wx:key="id"
+        class="cat-item {{currentCategory === item.id ? 'cat-active' : ''}}"
+        data-id="{{item.id}}"
+        bindtap="onCategoryTap"
+      >{{item.name}}</view>
+    </scroll-view>
+
+    <!-- 右侧菜品列表 -->
+    <scroll-view class="dish-list" scroll-y>
+      <view class="dish-card" wx:for="{{filteredDishes}}" wx:key="id">
+        <view class="dish-emoji">{{item.emoji}}</view>
+        <view class="dish-info">
+          <view class="dish-name">{{item.name}}</view>
+          <view class="dish-desc">{{item.desc}} · 月售{{item.sales}}份</view>
+          <view class="dish-bottom">
+            <text class="dish-price">¥{{item.price}}</text>
+            <view class="add-btn" data-id="{{item.id}}" bindtap="onAddTap">＋</view>
+          </view>
+        </view>
+      </view>
+      <view class="list-end">— 已经到底啦 —</view>
+    </scroll-view>
+  </view>
+
+  <!-- 购物车展开明细 -->
+  <view class="cart-panel {{showCart ? 'cart-panel-open' : ''}}" wx:if="{{totalCount > 0}}">
+    <view class="cart-head">
+      <text>购物车</text>
+      <text class="cart-clear" bindtap="onClearCart">🗑 清空</text>
+    </view>
+    <scroll-view class="cart-items" scroll-y>
+      <view class="cart-row" wx:for="{{cart}}" wx:key="id">
+        <text class="cart-name">{{item.emoji}} {{item.name}}</text>
+        <view class="cart-ops">
+          <text class="price-s">¥{{item.price}}</text>
+          <view class="op op-minus" data-id="{{item.id}}" bindtap="onMinusTap">－</view>
+          <text class="op-count">{{item.count}}</text>
+          <view class="op op-add" data-id="{{item.id}}" bindtap="onAddTap">＋</view>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 底部购物车栏 -->
+  <view class="cart-bar">
+    <view class="cart-icon-wrap" bindtap="onToggleCart">
+      <text class="cart-icon">🛒</text>
+      <view class="cart-badge" wx:if="{{totalCount > 0}}">{{totalCount}}</view>
+    </view>
+    <view class="cart-total" bindtap="onToggleCart">
+      <text wx:if="{{totalPrice > 0}}">¥{{totalPrice}}</text>
+      <text wx:else class="cart-empty-tip">未选购商品</text>
+    </view>
+    <view class="checkout-btn {{totalCount > 0 ? '' : 'checkout-disabled'}}" bindtap="onCheckout">去结算</view>
+  </view>
+
+</view>

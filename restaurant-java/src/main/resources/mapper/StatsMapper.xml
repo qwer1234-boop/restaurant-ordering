@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.restaurant.mapper.StatsMapper">
+
+    <!-- 累计经营数据（已取消订单不计入） -->
+    <select id="selectTotal" resultType="map">
+        SELECT COUNT(*)                       AS orderCount,
+               IFNULL(SUM(total_amount), 0)   AS turnover,
+               IFNULL(SUM(item_count), 0)     AS dishCount
+          FROM orders
+         WHERE status &lt;&gt; '已取消'
+    </select>
+
+    <!-- 今日经营数据 -->
+    <select id="selectToday" resultType="map">
+        SELECT COUNT(*)                     AS orderCount,
+               IFNULL(SUM(total_amount), 0) AS turnover
+          FROM orders
+         WHERE status &lt;&gt; '已取消'
+           AND DATE(created_at) = CURDATE()
+    </select>
+
+    <!-- 餐桌占用情况 -->
+    <select id="selectTableStat" resultType="map">
+        SELECT SUM(CASE WHEN status = 1 THEN 1 ELSE 0 END) AS usingCount,
+               COUNT(*)                                    AS totalCount
+          FROM dining_table
+    </select>
+
+    <!-- 菜品销量排行 TOP N -->
+    <select id="selectTopDishes" resultType="map">
+        SELECT i.dish_id  AS dishId,
+               i.dish_name AS name,
+               i.emoji     AS emoji,
+               SUM(i.`count`)  AS soldCount,
+               SUM(i.subtotal) AS amount
+          FROM order_item i
+          JOIN orders o ON o.id = i.order_id
+         WHERE o.status &lt;&gt; '已取消'
+         GROUP BY i.dish_id, i.dish_name, i.emoji
+         ORDER BY soldCount DESC
+         LIMIT #{limit}
+    </select>
+
+    <!-- 分类营业额占比：用 CASE 过滤掉"已取消订单"的明细，避免被计入 -->
+    <select id="selectCategoryStats" resultType="map">
+        SELECT c.name AS categoryName,
+               IFNULL(SUM(CASE WHEN o.id IS NOT NULL THEN i.`count`   ELSE 0 END), 0) AS soldCount,
+               IFNULL(SUM(CASE WHEN o.id IS NOT NULL THEN i.subtotal ELSE 0 END), 0) AS amount
+          FROM category c
+          LEFT JOIN dish d       ON d.category_id = c.id
+          LEFT JOIN order_item i ON i.dish_id = d.id
+          LEFT JOIN orders o     ON o.id = i.order_id AND o.status &lt;&gt; '已取消'
+         GROUP BY c.id, c.name
+         ORDER BY amount DESC
+    </select>
+
+</mapper>

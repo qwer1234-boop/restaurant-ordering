@@ -1,0 +1,44 @@
+<!--pages/confirm/confirm.wxml 订单确认页-->
+<view class="page">
+
+  <view class="card">
+    <view class="card-title">订单明细</view>
+    <view class="row" wx:for="{{cart}}" wx:key="id">
+      <text class="name">{{item.emoji}} {{item.name}} × {{item.count}}</text>
+      <view class="right">
+        <text class="price">¥{{item.count * item.price}}</text>
+        <view class="minus" data-id="{{item.id}}" bindtap="onMinusTap">－</view>
+      </view>
+    </view>
+    <view class="total-row">
+      <text>共 {{totalCount}} 件</text>
+      <text class="total">合计：<text class="total-price">¥{{totalPrice}}</text></text>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="card-title">用餐信息</view>
+    <view class="form-row">
+      <text class="label">桌号</text>
+      <input class="input" placeholder="如：A01" value="{{tableNo}}" bindinput="onTableInput" />
+    </view>
+    <view class="table-picker" wx:if="{{tables.length > 0}}">
+      <view class="table-chip {{tableNo === item.tableNo ? 'table-chip-active' : ''}}"
+            wx:for="{{tables}}"
+            wx:key="tableNo"
+            data-no="{{item.tableNo}}"
+            bindtap="onTableSelect">
+        {{item.tableNo}}（{{item.seats}}人）
+      </view>
+    </view>
+    <view class="form-row">
+      <text class="label">备注</text>
+      <input class="input" placeholder="口味偏好、忌口等（选填）" value="{{note}}" bindinput="onNoteInput" />
+    </view>
+  </view>
+
+  <button class="submit-btn" bindtap="onSubmit" disabled="{{submitting}}">
+    {{submitting ? '正在提交…' : '提交订单 ¥' + totalPrice}}
+  </button>
+
+</view>

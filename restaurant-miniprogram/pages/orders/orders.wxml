@@ -1,0 +1,38 @@
+<!--pages/orders/orders.wxml 历史订单页-->
+<view class="page">
+
+  <!-- 数据来源提示 -->
+  <view class="source-bar {{dataSource === 'server' ? 'source-online' : 'source-offline'}}" wx:if="{{!loading}}">
+    {{dataSource === 'server' ? '✓ 数据来自后端数据库' : '⚠ 后端未连接，展示本地缓存订单'}}
+  </view>
+
+  <view wx:if="{{orders.length === 0}}" class="empty">
+    <text class="empty-icon">🍽️</text>
+    <text class="empty-text">还没有订单，去点一单吧～</text>
+  </view>
+
+  <view class="order-card" wx:for="{{orders}}" wx:key="id">
+    <view class="order-head" data-index="{{index}}" bindtap="onToggle">
+      <view class="order-no">订单号：{{item.id}}</view>
+      <view class="order-status">{{item.status}}</view>
+    </view>
+    <view class="order-info">
+      <text>桌号：{{item.tableNo}}</text>
+      <text class="order-time">{{item.time}}</text>
+    </view>
+    <view class="order-summary">
+      {{item.items[0].name}} 等 {{item.items.length}} 种菜品
+      <text class="order-total">¥{{item.total}}</text>
+    </view>
+
+    <!-- 展开的明细 -->
+    <view class="order-detail" wx:if="{{item.expanded}}">
+      <view class="detail-row" wx:for="{{item.items}}" wx:for-item="dish" wx:key="id">
+        <text>{{dish.emoji}} {{dish.name}} × {{dish.count}}</text>
+        <text class="detail-price">¥{{dish.count * dish.price}}</text>
+      </view>
+      <view class="detail-note" wx:if="{{item.note}}">备注：{{item.note}}</view>
+    </view>
+  </view>
+
+</view>

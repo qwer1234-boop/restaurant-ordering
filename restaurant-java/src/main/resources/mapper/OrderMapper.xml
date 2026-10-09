@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.restaurant.mapper.OrderMapper">
+
+    <!-- 新增订单主表，useGeneratedKeys 把自增主键回填到实体 id -->
+    <insert id="insertOrder" parameterType="com.restaurant.entity.Order"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO orders (order_no, table_no, total_amount, item_count, remark, status)
+        VALUES (#{orderNo}, #{tableNo}, #{totalAmount}, #{itemCount}, #{remark}, #{status})
+    </insert>
+
+    <!-- 新增订单明细 -->
+    <insert id="insertItem" parameterType="com.restaurant.entity.OrderItem">
+        INSERT INTO order_item (order_id, dish_id, dish_name, emoji, price, `count`, subtotal)
+        VALUES (#{orderId}, #{dishId}, #{name}, #{emoji}, #{price}, #{count}, #{subtotal})
+    </insert>
+
+    <select id="selectByOrderNo" resultType="com.restaurant.entity.Order">
+        SELECT id, order_no, table_no, total_amount, item_count, remark, status, created_at
+          FROM orders
+         WHERE order_no = #{orderNo}
+    </select>
+
+    <!-- 订单列表：动态条件 + 倒序 + 限制条数 -->
+    <select id="selectOrders" resultType="com.restaurant.entity.Order">
+        SELECT id, order_no, table_no, total_amount, item_count, remark, status, created_at
+          FROM orders
+        <where>
+            <if test="status != null and status != ''">
+                status = #{status}
+            </if>
+        </where>
+         ORDER BY id DESC
+         LIMIT #{limit}
+    </select>
+
+    <!-- 明细列表：dish_name 起别名为 name，与前端字段保持一致 -->
+    <select id="selectItemsByOrderId" resultType="com.restaurant.entity.OrderItem">
+        SELECT id, order_id, dish_id, dish_name AS name, emoji, price, `count`, subtotal
+          FROM order_item
+         WHERE order_id = #{orderId}
+         ORDER BY id ASC
+    </select>
+
+    <update id="updateStatus">
+        UPDATE orders
+           SET status = #{status}
+         WHERE id = #{id}
+    </update>
+
+</mapper>

@@ -1,0 +1,31 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/orders/orders",
+    "pages/confirm/confirm"
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#ff7a3c",
+    "navigationBarTextStyle": "white",
+    "navigationBarTitleText": "美味餐厅点餐",
+    "backgroundColor": "#f6f6f6"
+  },
+  "tabBar": {
+    "color": "#999999",
+    "selectedColor": "#ff7a3c",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "点餐"
+      },
+      {
+        "pagePath": "pages/orders/orders",
+        "text": "订单"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

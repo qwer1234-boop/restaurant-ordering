@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.restaurant.mapper.MenuMapper">
+
+    <!-- 分类列表：LEFT JOIN 统计各分类在售菜品数量 -->
+    <select id="selectCategories" resultType="com.restaurant.entity.Category">
+        SELECT c.id,
+               c.name,
+               c.sort_order,
+               COUNT(d.id) AS dish_count
+          FROM category c
+          LEFT JOIN dish d ON d.category_id = c.id AND d.status = 1
+         GROUP BY c.id, c.name, c.sort_order
+         ORDER BY c.sort_order ASC
+    </select>
+
+    <!-- 菜品列表：支持分类过滤与名称模糊搜索 -->
+    <select id="selectDishes" resultType="com.restaurant.entity.Dish">
+        SELECT d.id,
+               d.category_id,
+               c.name AS category_name,
+               d.name,
+               d.price,
+               d.emoji,
+               d.description,
+               d.sales,
+               d.stock,
+               d.status
+          FROM dish d
+          JOIN category c ON c.id = d.category_id
+         WHERE d.status = 1
+        <if test="categoryId != null">
+            AND d.category_id = #{categoryId}
+        </if>
+        <if test="keyword != null and keyword != ''">
+            AND d.name LIKE CONCAT('%', #{keyword}, '%')
+        </if>
+         ORDER BY d.category_id ASC, d.sales DESC
+    </select>
+
+    <select id="selectDishById" resultType="com.restaurant.entity.Dish">
+        SELECT id, category_id, name, price, emoji, description, sales, stock, status
+          FROM dish
+         WHERE id = #{id}
+    </select>
+
+    <!-- 下单成功后：销量增加、库存扣减（一条 SQL 保证原子性） -->
+    <update id="addSalesAndDecreaseStock">
+        UPDATE dish
+           SET sales = sales + #{count},
+               stock = stock - #{count}
+         WHERE id = #{dishId}
+    </update>
+
+    <!-- 取消订单：回退销量与库存 -->
+    <update id="rollbackSalesAndStock">
+        UPDATE dish
+           SET sales = sales - #{count},
+               stock = stock + #{count}
+         WHERE id = #{dishId}
+    </update>
+
+</mapper>
