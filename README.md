@@ -1,5 +1,7 @@
 # 模拟餐厅点餐系统（课程作业 · 前后端分离）
 
+![Java CI](https://github.com/qwer1234-boop/restaurant-ordering/actions/workflows/maven.yml/badge.svg)
+
 ```
 2026-09-23-12-38-43/
 ├── restaurant-miniprogram/     微信小程序前端

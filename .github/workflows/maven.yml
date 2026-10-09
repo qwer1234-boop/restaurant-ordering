@@ -1,0 +1,35 @@
+name: Java CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: restaurant-java
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 配置 JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Maven 编译打包
+        run: mvn -B clean package -DskipTests
+
+      - name: 上传构建产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: restaurant-java-jar
+          path: restaurant-java/target/*.jar
+          if-no-files-found: error
