@@ -67,8 +67,76 @@ mvn spring-boot:run            # 或 java -jar target/restaurant-java-1.0.0.jar
 | `order_item` | 订单明细表 | 菜品名称/单价**快照**、数量、小计 |
 | `v_order_detail` | 订单详情视图 | 主表与明细关联，便于报表查询 |
 
-外键：`dish.category_id → category.id`、`order_item.order_id → orders.id`（级联删除）
-索引：`idx_dish_category`、`idx_orders_created`、`idx_orders_status`、`idx_item_order` 等
+### E-R 图
+
+```mermaid
+erDiagram
+    CATEGORY     ||--o{ DISH        : "分类包含菜品"
+    DISH         ||--o{ ORDER_ITEM  : "菜品被下单"
+    ORDERS       ||--|{ ORDER_ITEM  : "订单包含明细"
+    DINING_TABLE ||--o{ ORDERS      : "餐桌产生订单"
+
+    CATEGORY {
+        INT      id         PK
+        VARCHAR  name       "分类名称"
+        INT      sort_order "排序号"
+        DATETIME created_at "创建时间"
+    }
+    DISH {
+        INT      id           PK
+        INT      category_id  FK
+        VARCHAR  name         "菜品名称"
+        DECIMAL  price        "单价"
+        VARCHAR  emoji        "图标"
+        VARCHAR  description  "简介"
+        INT      sales        "累计销量"
+        INT      stock        "库存份数"
+        TINYINT  status       "1在售 0停售"
+        DATETIME created_at   "创建时间"
+    }
+    DINING_TABLE {
+        INT     id       PK
+        VARCHAR table_no UK "桌号 如A01"
+        TINYINT seats       "座位数"
+        TINYINT status      "0空闲 1使用中"
+    }
+    ORDERS {
+        INT      id           PK
+        VARCHAR  order_no     UK "订单号"
+        VARCHAR  table_no        "桌号"
+        DECIMAL  total_amount    "订单总金额"
+        INT      item_count      "菜品总份数"
+        VARCHAR  remark          "顾客备注"
+        VARCHAR  status          "待处理/制作中/已完成/已取消"
+        DATETIME created_at      "下单时间"
+    }
+    ORDER_ITEM {
+        INT     id        PK
+        INT     order_id  FK
+        INT     dish_id      "菜品ID"
+        VARCHAR dish_name    "菜品名称(快照)"
+        VARCHAR emoji        "图标(快照)"
+        DECIMAL price        "下单时单价(快照)"
+        INT     count        "数量"
+        DECIMAL subtotal     "小计"
+    }
+```
+
+### 实体间关系
+
+| 关系 | 基数 | 关联字段 | 说明 |
+| ---- | ---- | -------- | ---- |
+| 分类 → 菜品 | 1 : N | `dish.category_id → category.id` | 外键约束，一个分类下有多道菜 |
+| 订单 → 明细 | 1 : N | `order_item.order_id → orders.id` | 外键约束，**级联删除**（删订单自动删明细） |
+| 菜品 → 明细 | 1 : N | `order_item.dish_id` | 逻辑关联（不建外键，避免菜品下架影响历史订单） |
+| 餐桌 → 订单 | 1 : N | `orders.table_no` | 逻辑关联（按桌号匹配，便于餐桌状态流转） |
+
+**外键**：`dish.category_id → category.id`、`order_item.order_id → orders.id`（级联删除）
+**索引**：`idx_dish_category`、`idx_dish_status`、`idx_orders_created`、`idx_orders_status`、`idx_orders_table`、`idx_item_order`、`uk_table_no`、`uk_order_no`
+**视图**：`v_order_detail`（订单主表 JOIN 明细，供统计报表直接查询）
+
+> 设计要点：`order_item` 中的 `dish_name / price / emoji` 是**下单瞬间的数据快照**，
+> 菜品后续改名或改价不会让历史订单金额失真。
 
 ## 五、作业提交与报告要点
 
