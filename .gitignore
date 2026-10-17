@@ -29,3 +29,6 @@ Thumbs.db
 
 # ---- WorkBuddy 工作区元数据（含会话记忆，不公开）----
 .workbuddy/
+
+# ---- 网页上传用的导出目录 ----
+_upload/
