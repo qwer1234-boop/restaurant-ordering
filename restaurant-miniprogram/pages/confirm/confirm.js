@@ -10,6 +10,7 @@ Page({
     tableNo: '',        // 桌号
     note: '',           // 备注
     tables: [],         // 可选的餐桌列表（来自后端 /api/tables）
+    quickNotes: ['少辣', '不要香菜', '多放醋', '口味清淡', '打包带走'],  // 备注快捷标签
     submitting: false
   },
 
@@ -30,9 +31,26 @@ Page({
       .catch(() => this.setData({ tables: [] }));
   },
 
-  // 点选餐桌
+  // 点选餐桌（已占用且非当前选中的餐桌不允许切换过去）
   onTableSelect(e) {
-    this.setData({ tableNo: e.currentTarget.dataset.no });
+    const { no, busy } = e.currentTarget.dataset;
+    if (busy && this.data.tableNo !== no) {
+      wx.showToast({ title: '该餐桌正在使用中', icon: 'none' });
+      return;
+    }
+    this.setData({ tableNo: no });
+  },
+
+  // 备注快捷标签：点击填入备注输入框
+  onQuickNote(e) {
+    const text = e.currentTarget.dataset.text;
+    const cur = this.data.note;
+    // 已包含则移除，未包含则追加（支持多标签组合）
+    if (cur.indexOf(text) > -1) {
+      this.setData({ note: cur.replace(text, '').replace(/^，|，$|，{2,}/g, m => m.length > 1 ? '，' : '') });
+    } else {
+      this.setData({ note: cur ? cur + '，' + text : text });
+    }
   },
 
   refresh() {

@@ -2,6 +2,19 @@
 const api = require('../../utils/api.js');
 const app = getApp();
 
+// 订单状态 → 标签样式类 / 进度步数 / 是否已取消
+function decorateOrder(o) {
+  const status = o.status || '';
+  let statusType = 'pending';
+  let step = 0;
+  let cancelled = false;
+  if (status.indexOf('制作中') > -1) { statusType = 'cooking'; step = 1; }
+  else if (status.indexOf('已完成') > -1) { statusType = 'done'; step = 2; }
+  else if (status.indexOf('已取消') > -1) { statusType = 'cancel'; cancelled = true; }
+  else if (status.indexOf('本地') > -1) { statusType = 'local'; }
+  return { ...o, statusType, step, cancelled };
+}
+
 Page({
   data: {
     orders: [],
@@ -15,12 +28,14 @@ Page({
 
   // 优先从后端数据库读取订单，失败则展示本地缓存订单
   loadOrders() {
-    const localOrders = (app.globalData.orders || []).filter(o => !o.fromServer);
+    const localOrders = (app.globalData.orders || [])
+      .filter(o => !o.fromServer)
+      .map(o => decorateOrder(o));
 
     api.getOrders(50)
       .then(list => {
         // 后端订单结构 → 页面展示结构
-        const serverOrders = list.map(o => ({
+        const serverOrders = list.map(o => decorateOrder({
           id: o.orderNo,
           tableNo: o.tableNo,
           note: o.remark,
@@ -52,6 +67,11 @@ Page({
     const index = e.currentTarget.dataset.index;
     const key = `orders[${index}].expanded`;
     this.setData({ [key]: !this.data.orders[index].expanded });
+  },
+
+  // 空状态：去点餐
+  onGoMenu() {
+    wx.switchTab({ url: '/pages/index/index' });
   },
 
   // 下拉刷新

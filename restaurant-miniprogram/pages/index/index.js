@@ -6,14 +6,20 @@ const app = getApp();
 Page({
   data: {
     categories: [],      // 左侧分类列表（来自后端接口）
-    dishes: [],          // 全部菜品（来自后端接口）
+    dishes: [],          // 全部菜品（已附加 hot / soldOut 展示标记）
     currentCategory: 0,  // 当前选中分类
     filteredDishes: [],  // 当前分类下的菜品
     cart: [],            // 购物车
+    cartMap: {},         // 菜品ID → 购物车数量（驱动步进器显示）
     totalCount: 0,       // 购物车总数量
     totalPrice: 0,       // 购物车总价（元）
     showCart: false,     // 是否展开购物车面板
-    dataSource: ''       // 数据来源提示：server 后端 / local 本地兜底
+    dataSource: '',      // 数据来源提示：server 后端 / local 本地兜底
+    loading: true,       // 骨架屏开关
+    searchKey: '',       // 搜索关键词
+    searchResults: [],   // 搜索结果（跨分类）
+    fly: { visible: false, x: 0, y: 0, opacity: 1 },  // 加购抛物线小球
+    badgeBump: false     // 购物车徽标弹跳动画
   },
 
   onLoad() {
@@ -31,10 +37,8 @@ Page({
     const self = this;
     return Promise.all([api.getCategories(), api.getDishes()])
       .then(([categories, dishes]) => {
-        // 后端字段 description → 页面用的 desc
-        const list = dishes.map(d => ({ ...d, desc: d.description }));
         app.globalData.apiOnline = true;
-        self.setData({ categories, dishes: list, dataSource: 'server' });
+        self.setData({ categories, dishes: self.decorateDishes(dishes), dataSource: 'server', loading: false });
         self.filterDishes(categories.length ? categories[0].id : 0);
       })
       .catch(err => {
@@ -42,12 +46,27 @@ Page({
         app.globalData.apiOnline = false;
         self.setData({
           categories: localData.categories,
-          dishes: localData.dishes,
-          dataSource: 'local'
+          dishes: self.decorateDishes(localData.dishes),
+          dataSource: 'local',
+          loading: false
         });
         self.filterDishes(localData.categories[0].id);
         wx.showToast({ title: '已使用本地数据（后端未启动）', icon: 'none', duration: 2500 });
       });
+  },
+
+  // 附加展示标记：desc 字段映射、热销标签（销量前3）、售罄标记
+  decorateDishes(dishes) {
+    const top3 = [...dishes]
+      .sort((a, b) => (b.sales || 0) - (a.sales || 0))
+      .slice(0, 3)
+      .map(d => d.id);
+    return dishes.map(d => ({
+      ...d,
+      desc: d.description !== undefined ? d.description : d.desc,
+      hot: (d.sales || 0) > 0 && top3.indexOf(d.id) > -1,
+      soldOut: typeof d.stock === 'number' && d.stock <= 0
+    }));
   },
 
   // 按分类过滤菜品
@@ -61,11 +80,39 @@ Page({
     this.filterDishes(e.currentTarget.dataset.id);
   },
 
-  // 加购
+  // 搜索：跨分类模糊匹配名称/简介
+  onSearchInput(e) {
+    const searchKey = e.detail.value.trim();
+    const searchResults = searchKey
+      ? this.data.dishes.filter(d =>
+          (d.name && d.name.indexOf(searchKey) > -1) ||
+          (d.desc && d.desc.indexOf(searchKey) > -1))
+      : [];
+    this.setData({ searchKey, searchResults });
+  },
+
+  onClearSearch() {
+    this.setData({ searchKey: '', searchResults: [] });
+  },
+
+  // 加购：库存校验 → 抛物线动画 → 更新购物车
   onAddTap(e) {
-    const dish = this.data.dishes.find(d => d.id === e.currentTarget.dataset.id);
+    const id = e.currentTarget.dataset.id;
+    const dish = this.data.dishes.find(d => d.id === id);
+    if (!dish) return;
+
+    // 库存校验：购物车中数量已达库存上限则拒绝
+    const inCart = this.data.cartMap[id] || 0;
+    if (typeof dish.stock === 'number' && inCart >= dish.stock) {
+      wx.showToast({ title: '库存不足', icon: 'none' });
+      return;
+    }
+
+    // 播放飞入购物车动画，结束后徽标弹跳
+    this.flyToCart(id);
+
     const cart = app.globalData.cart;
-    const item = cart.find(i => i.id === dish.id);
+    const item = cart.find(i => i.id === id);
     if (item) {
       item.count += 1;
     } else {
@@ -87,12 +134,14 @@ Page({
     this.refreshCart();
   },
 
-  // 重新计算数量与总价
+  // 重新计算数量、总价与 cartMap（菜品ID → 数量）
   refreshCart() {
     const cart = app.globalData.cart;
     const totalCount = cart.reduce((s, i) => s + i.count, 0);
-    const totalPrice = cart.reduce((s, i) => s + i.count * i.price, 0);
-    this.setData({ cart, totalCount, totalPrice });
+    const totalPrice = Math.round(cart.reduce((s, i) => s + i.count * i.price, 0) * 100) / 100;
+    const cartMap = {};
+    cart.forEach(i => { cartMap[i.id] = i.count; });
+    this.setData({ cart, totalCount, totalPrice, cartMap });
   },
 
   // 展开 / 收起购物车明细
@@ -116,5 +165,60 @@ Page({
     }
     this.setData({ showCart: false });
     wx.navigateTo({ url: '/pages/confirm/confirm' });
+  },
+
+  /**
+   * 加购抛物线动画：小球从加号按钮飞入购物车图标
+   * 方案参考掘金踩坑文：小程序无 rAF、wx:if 动态插入节点真机不触发 transition，
+   * 故采用「常驻节点 + setTimeout 逐帧插值 + easeOutCubic 贝塞尔」，真机/工具均稳定。
+   */
+  flyToCart(dishId) {
+    const self = this;
+    const sys = wx.getWindowInfo ? wx.getWindowInfo() : wx.getSystemInfoSync();
+
+    const fromQuery = wx.createSelectorQuery();
+    fromQuery.select('#dish-add-' + dishId).boundingClientRect();
+    fromQuery.select('#cartIcon').boundingClientRect();
+    fromQuery.exec(res => {
+      const from = res[0];
+      const target = res[1];
+      // 起点按钮不在当前可视列表（如从购物车面板加购）→ 跳过抛物线，徽标直接弹跳
+      if (!from || !target) {
+        self.setData({ badgeBump: true });
+        setTimeout(() => self.setData({ badgeBump: false }), 300);
+        return;
+      }
+
+      const sx = from.left + from.width / 2;
+      const sy = from.top + from.height / 2;
+      const tx = target.left + target.width / 2;
+      const ty = target.top + target.height / 2;
+
+      // 二次贝塞尔控制点：中点上方，形成抛物线
+      const cx = (sx + tx) / 2;
+      const cy = Math.min(sy, ty) - sys.windowHeight * 0.12;
+
+      const duration = 550;
+      const start = Date.now();
+      self.setData({ 'fly.visible': true, 'fly.x': sx, 'fly.y': sy, 'fly.opacity': 1 });
+
+      const step = () => {
+        const t = Math.min((Date.now() - start) / duration, 1);
+        const e = 1 - Math.pow(1 - t, 3); // easeOutCubic
+        const x = (1 - e) * (1 - e) * sx + 2 * (1 - e) * e * cx + e * e * tx;
+        const y = (1 - e) * (1 - e) * sy + 2 * (1 - e) * e * cy + e * e * ty;
+        // 最后 15% 行程淡出
+        const opacity = t > 0.85 ? Math.max(0, (1 - t) / 0.15) : 1;
+        self.setData({ 'fly.x': x, 'fly.y': y, 'fly.opacity': opacity });
+        if (t < 1) {
+          setTimeout(step, 16);
+        } else {
+          // 落点：隐藏小球，徽标弹跳
+          self.setData({ 'fly.visible': false, badgeBump: true });
+          setTimeout(() => self.setData({ badgeBump: false }), 300);
+        }
+      };
+      setTimeout(step, 16);
+    });
   }
 });

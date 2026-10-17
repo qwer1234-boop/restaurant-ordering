@@ -5,14 +5,14 @@
     "pages/confirm/confirm"
   ],
   "window": {
-    "navigationBarBackgroundColor": "#ff7a3c",
+    "navigationBarBackgroundColor": "#ff6b35",
     "navigationBarTextStyle": "white",
     "navigationBarTitleText": "美味餐厅点餐",
-    "backgroundColor": "#f6f6f6"
+    "backgroundColor": "#f7f8fa"
   },
   "tabBar": {
-    "color": "#999999",
-    "selectedColor": "#ff7a3c",
+    "color": "#86909c",
+    "selectedColor": "#ff6b35",
     "backgroundColor": "#ffffff",
     "borderStyle": "black",
     "list": [
@@ -27,5 +27,6 @@
     ]
   },
   "style": "v2",
+  "lazyCodeLoading": "requiredComponents",
   "sitemapLocation": "sitemap.json"
 }

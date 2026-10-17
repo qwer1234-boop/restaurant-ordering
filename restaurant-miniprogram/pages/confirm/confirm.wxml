@@ -1,44 +1,86 @@
 <!--pages/confirm/confirm.wxml 订单确认页-->
 <view class="page">
 
+  <!-- 订单明细卡片 -->
   <view class="card">
-    <view class="card-title">订单明细</view>
+    <view class="card-title">
+      <view class="title-bar"></view>
+      <text>订单明细</text>
+    </view>
     <view class="row" wx:for="{{cart}}" wx:key="id">
-      <text class="name">{{item.emoji}} {{item.name}} × {{item.count}}</text>
+      <view class="row-left">
+        <text class="row-emoji">{{item.emoji}}</text>
+        <text class="name">{{item.name}}</text>
+        <text class="count">× {{item.count}}</text>
+      </view>
       <view class="right">
         <text class="price">¥{{item.count * item.price}}</text>
-        <view class="minus" data-id="{{item.id}}" bindtap="onMinusTap">－</view>
+        <view class="minus" data-id="{{item.id}}" catchtap="onMinusTap">−</view>
       </view>
     </view>
+
+    <!-- 金额明细 -->
+    <view class="fee-rows">
+      <view class="fee-row">
+        <text class="fee-label">商品合计</text>
+        <text class="fee-value">¥{{totalPrice}}</text>
+      </view>
+      <view class="fee-row">
+        <text class="fee-label">餐位费</text>
+        <text class="fee-value fee-free">免费</text>
+      </view>
+    </view>
+
     <view class="total-row">
-      <text>共 {{totalCount}} 件</text>
+      <text class="total-count">共 {{totalCount}} 件</text>
       <text class="total">合计：<text class="total-price">¥{{totalPrice}}</text></text>
     </view>
   </view>
 
+  <!-- 用餐信息卡片 -->
   <view class="card">
-    <view class="card-title">用餐信息</view>
+    <view class="card-title">
+      <view class="title-bar"></view>
+      <text>用餐信息</text>
+    </view>
     <view class="form-row">
       <text class="label">桌号</text>
-      <input class="input" placeholder="如：A01" value="{{tableNo}}" bindinput="onTableInput" />
+      <input class="input" placeholder="如：A01" placeholder-class="input-ph" value="{{tableNo}}" bindinput="onTableInput" />
     </view>
     <view class="table-picker" wx:if="{{tables.length > 0}}">
-      <view class="table-chip {{tableNo === item.tableNo ? 'table-chip-active' : ''}}"
+      <view class="table-chip {{tableNo === item.tableNo ? 'table-chip-active' : ''}} {{item.status === 1 && tableNo !== item.tableNo ? 'table-chip-busy' : ''}}"
             wx:for="{{tables}}"
             wx:key="tableNo"
             data-no="{{item.tableNo}}"
-            bindtap="onTableSelect">
-        {{item.tableNo}}（{{item.seats}}人）
+            data-busy="{{item.status === 1}}"
+            catchtap="onTableSelect">
+        {{item.tableNo}}<text class="chip-seats">{{item.seats}}人</text>
       </view>
     </view>
     <view class="form-row">
       <text class="label">备注</text>
-      <input class="input" placeholder="口味偏好、忌口等（选填）" value="{{note}}" bindinput="onNoteInput" />
+      <input class="input" placeholder="口味偏好、忌口等（选填）" placeholder-class="input-ph" value="{{note}}" bindinput="onNoteInput" />
+    </view>
+    <!-- 备注快捷标签：点一下填入，常见于外卖 App -->
+    <view class="quick-notes">
+      <view class="note-chip" wx:for="{{quickNotes}}" wx:key="*this"
+            data-text="{{item}}" catchtap="onQuickNote">{{item}}</view>
     </view>
   </view>
 
-  <button class="submit-btn" bindtap="onSubmit" disabled="{{submitting}}">
-    {{submitting ? '正在提交…' : '提交订单 ¥' + totalPrice}}
-  </button>
+  <!-- 底部占位，防止被固定按钮遮挡 -->
+  <view class="bottom-gap"></view>
+
+  <!-- 底部固定提交栏 -->
+  <view class="submit-bar">
+    <view class="submit-total">
+      <text class="submit-label">合计</text>
+      <text class="submit-symbol">¥</text>
+      <text class="submit-price">{{totalPrice}}</text>
+    </view>
+    <view class="submit-btn {{submitting ? 'submit-loading' : ''}}" catchtap="onSubmit">
+      {{submitting ? '正在提交…' : '提交订单'}}
+    </view>
+  </view>
 
 </view>

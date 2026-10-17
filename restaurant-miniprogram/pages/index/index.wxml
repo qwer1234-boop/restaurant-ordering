@@ -1,13 +1,71 @@
 <!--pages/index/index.wxml 点餐主页-->
 <view class="page">
 
-  <!-- 门店信息条 -->
-  <view class="shop-bar">
-    <text class="shop-name">🍜 美味餐厅（模拟）</text>
-    <text class="shop-tip">堂食 · 免排队</text>
+  <!-- 顶部：渐变头部 + 搜索框（参考美团/饿了么外卖头部结构） -->
+  <view class="header">
+    <view class="shop-row">
+      <text class="shop-name">🍜 美味餐厅</text>
+      <view class="status-pill {{dataSource === 'server' ? 'status-online' : 'status-offline'}}">
+        <view class="status-dot"></view>
+        <text>{{dataSource === 'server' ? '已连接后厨' : '离线模式'}}</text>
+      </view>
+    </view>
+    <view class="shop-sub">堂食点餐 · 免排队 · 下单后自动通知后厨</view>
+    <view class="search-box">
+      <text class="search-icon">🔍</text>
+      <input class="search-input" placeholder="搜索菜品，如：宫保鸡丁"
+             placeholder-class="search-ph"
+             value="{{searchKey}}" bindinput="onSearchInput" />
+      <text class="search-clear" wx:if="{{searchKey}}" catchtap="onClearSearch">✕</text>
+    </view>
   </view>
 
-  <view class="main">
+  <!-- 骨架屏：数据加载中（参考 veding-ui loading 组件） -->
+  <view class="skeleton-wrap" wx:if="{{loading}}">
+    <view class="skeleton-card" wx:for="{{[1,2,3,4]}}" wx:key="*this">
+      <view class="sk-img"></view>
+      <view class="sk-lines">
+        <view class="sk-line sk-w60"></view>
+        <view class="sk-line sk-w80"></view>
+        <view class="sk-line sk-w40"></view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 搜索结果（跨分类，优先展示） -->
+  <scroll-view class="search-list" scroll-y wx:if="{{!loading && searchKey}}">
+    <view class="search-title">搜索 “{{searchKey}}” 的结果（{{searchResults.length}}）</view>
+    <view class="dish-card {{item.soldOut ? 'dish-soldout' : ''}}" wx:for="{{searchResults}}" wx:key="id">
+      <view class="dish-cover">
+        <text class="dish-emoji">{{item.emoji}}</text>
+        <view class="hot-tag" wx:if="{{item.hot}}">🔥 热销</view>
+      </view>
+      <view class="dish-info">
+        <view class="dish-name">{{item.name}}</view>
+        <view class="dish-desc">{{item.desc}}</view>
+        <view class="dish-meta">月售 {{item.sales}} 份<text wx:if="{{item.stock !== undefined}}" class="stock-tip"> · 库存 {{item.stock}}</text></view>
+        <view class="dish-bottom">
+          <text class="dish-price"><text class="price-symbol">¥</text>{{item.price}}</text>
+          <block wx:if="{{!item.soldOut}}">
+            <view class="stepper" wx:if="{{cartMap[item.id] > 0}}">
+              <view class="step-btn step-minus" catchtap="onMinusTap" data-id="{{item.id}}">−</view>
+              <text class="step-count">{{cartMap[item.id]}}</text>
+              <view class="step-btn step-plus" id="dish-add-{{item.id}}" catchtap="onAddTap" data-id="{{item.id}}">＋</view>
+            </view>
+            <view class="add-btn" wx:else id="dish-add-{{item.id}}" catchtap="onAddTap" data-id="{{item.id}}">＋</view>
+          </block>
+          <view class="soldout-tag" wx:else>已售罄</view>
+        </view>
+      </view>
+    </view>
+    <view class="empty-search" wx:if="{{searchResults.length === 0}}">
+      <text class="empty-icon">🔍</text>
+      <text class="empty-text">没有找到相关菜品，换个关键词试试</text>
+    </view>
+  </scroll-view>
+
+  <!-- 主体：分类 + 菜品（经典外卖双栏布局） -->
+  <view class="main" wx:if="{{!loading && !searchKey}}">
     <!-- 左侧分类栏 -->
     <scroll-view class="cat-list" scroll-y>
       <view
@@ -16,19 +74,35 @@
         class="cat-item {{currentCategory === item.id ? 'cat-active' : ''}}"
         data-id="{{item.id}}"
         bindtap="onCategoryTap"
-      >{{item.name}}</view>
+      >
+        <text>{{item.name}}</text>
+        <text class="cat-count" wx:if="{{item.dishCount !== undefined}}">{{item.dishCount}}</text>
+      </view>
     </scroll-view>
 
     <!-- 右侧菜品列表 -->
     <scroll-view class="dish-list" scroll-y>
-      <view class="dish-card" wx:for="{{filteredDishes}}" wx:key="id">
-        <view class="dish-emoji">{{item.emoji}}</view>
+      <view class="dish-card {{item.soldOut ? 'dish-soldout' : ''}}" wx:for="{{filteredDishes}}" wx:key="id">
+        <view class="dish-cover">
+          <text class="dish-emoji">{{item.emoji}}</text>
+          <view class="hot-tag" wx:if="{{item.hot}}">🔥 热销</view>
+        </view>
         <view class="dish-info">
           <view class="dish-name">{{item.name}}</view>
-          <view class="dish-desc">{{item.desc}} · 月售{{item.sales}}份</view>
+          <view class="dish-desc">{{item.desc}}</view>
+          <view class="dish-meta">月售 {{item.sales}} 份<text wx:if="{{item.stock !== undefined}}" class="stock-tip"> · 库存 {{item.stock}}</text></view>
           <view class="dish-bottom">
-            <text class="dish-price">¥{{item.price}}</text>
-            <view class="add-btn" data-id="{{item.id}}" bindtap="onAddTap">＋</view>
+            <text class="dish-price"><text class="price-symbol">¥</text>{{item.price}}</text>
+            <!-- 步进器：数量>0 显示 − n ＋（参考 veding-ui stepper / 美团菜品卡） -->
+            <block wx:if="{{!item.soldOut}}">
+              <view class="stepper" wx:if="{{cartMap[item.id] > 0}}">
+                <view class="step-btn step-minus" catchtap="onMinusTap" data-id="{{item.id}}">−</view>
+                <text class="step-count">{{cartMap[item.id]}}</text>
+                <view class="step-btn step-plus" id="dish-add-{{item.id}}" catchtap="onAddTap" data-id="{{item.id}}">＋</view>
+              </view>
+              <view class="add-btn" wx:else id="dish-add-{{item.id}}" catchtap="onAddTap" data-id="{{item.id}}">＋</view>
+            </block>
+            <view class="soldout-tag" wx:else>已售罄</view>
           </view>
         </view>
       </view>
@@ -36,36 +110,52 @@
     </scroll-view>
   </view>
 
-  <!-- 购物车展开明细 -->
+  <!-- 遮罩层：点击关闭购物车（参考外卖底部弹层） -->
+  <view class="mask {{showCart ? 'mask-show' : ''}}" wx:if="{{totalCount > 0}}" catchtap="onToggleCart"></view>
+
+  <!-- 购物车展开面板：从底部滑出 -->
   <view class="cart-panel {{showCart ? 'cart-panel-open' : ''}}" wx:if="{{totalCount > 0}}">
     <view class="cart-head">
-      <text>购物车</text>
-      <text class="cart-clear" bindtap="onClearCart">🗑 清空</text>
+      <text class="cart-title">购物车（{{totalCount}} 件）</text>
+      <text class="cart-clear" catchtap="onClearCart">🗑 清空</text>
     </view>
     <scroll-view class="cart-items" scroll-y>
       <view class="cart-row" wx:for="{{cart}}" wx:key="id">
-        <text class="cart-name">{{item.emoji}} {{item.name}}</text>
+        <view class="cart-dish">
+          <text class="cart-emoji">{{item.emoji}}</text>
+          <text class="cart-name">{{item.name}}</text>
+        </view>
         <view class="cart-ops">
           <text class="price-s">¥{{item.price}}</text>
-          <view class="op op-minus" data-id="{{item.id}}" bindtap="onMinusTap">－</view>
+          <view class="op op-minus" catchtap="onMinusTap" data-id="{{item.id}}">−</view>
           <text class="op-count">{{item.count}}</text>
-          <view class="op op-add" data-id="{{item.id}}" bindtap="onAddTap">＋</view>
+          <view class="op op-add" catchtap="onAddTap" data-id="{{item.id}}">＋</view>
         </view>
       </view>
     </scroll-view>
+    <view class="cart-panel-gap"></view>
   </view>
+
+  <!-- 加购抛物线小球（常驻元素，JS 逐帧控制，避开 wx:if 动画坑） -->
+  <view class="fly-dot" wx:if="{{fly.visible}}"
+        style="left: {{fly.x}}px; top: {{fly.y}}px; opacity: {{fly.opacity}};"></view>
 
   <!-- 底部购物车栏 -->
   <view class="cart-bar">
-    <view class="cart-icon-wrap" bindtap="onToggleCart">
+    <view class="cart-icon-wrap" id="cartIcon" bindtap="onToggleCart">
       <text class="cart-icon">🛒</text>
-      <view class="cart-badge" wx:if="{{totalCount > 0}}">{{totalCount}}</view>
+      <view class="cart-badge {{badgeBump ? 'badge-bump' : ''}}" wx:if="{{totalCount > 0}}">{{totalCount}}</view>
     </view>
     <view class="cart-total" bindtap="onToggleCart">
-      <text wx:if="{{totalPrice > 0}}">¥{{totalPrice}}</text>
-      <text wx:else class="cart-empty-tip">未选购商品</text>
+      <block wx:if="{{totalPrice > 0}}">
+        <text class="total-symbol">¥</text>
+        <text class="total-num">{{totalPrice}}</text>
+      </block>
+      <text wx:else class="cart-empty-tip">购物车是空的</text>
     </view>
-    <view class="checkout-btn {{totalCount > 0 ? '' : 'checkout-disabled'}}" bindtap="onCheckout">去结算</view>
+    <view class="checkout-btn {{totalCount > 0 ? '' : 'checkout-disabled'}}" bindtap="onCheckout">
+      去结算
+    </view>
   </view>
 
 </view>

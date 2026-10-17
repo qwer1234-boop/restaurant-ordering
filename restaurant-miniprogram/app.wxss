@@ -1,19 +1,70 @@
-/* app.wxss 全局样式 */
+/* ============================================================
+ * app.wxss 全局样式 · Design Tokens
+ * 设计参考：悦食记/外卖小程序主流设计系统
+ * 所有页面与组件统一引用变量，禁止硬编码色值
+ * ============================================================ */
 page {
-  background: #f6f6f6;
+  /* 品牌色：食欲橙渐变（餐饮行业主流） */
+  --color-primary: #ff6b35;
+  --color-primary-light: #ff8c42;
+  --color-primary-deep: #e8530c;
+  --color-primary-bg: #fff4ee;
+
+  /* 语义色 */
+  --color-price: #f53f3f;
+  --color-success: #00b42a;
+  --color-info: #165dff;
+  --color-gray: #86909c;
+  --color-cancel: #a9aeb8;
+
+  /* 文字层级 */
+  --color-text-1: #1d2129;
+  --color-text-2: #4e5969;
+  --color-text-3: #86909c;
+  --color-text-4: #c9cdd4;
+
+  /* 背景与边框 */
+  --color-bg: #f7f8fa;
+  --color-card: #ffffff;
+  --color-border: #f2f3f5;
+
+  /* 圆角 */
+  --radius-s: 8rpx;
+  --radius-m: 16rpx;
+  --radius-l: 24rpx;
+  --radius-pill: 999rpx;
+
+  /* 阴影 */
+  --shadow-card: 0 4rpx 20rpx rgba(29, 33, 41, 0.05);
+  --shadow-float: 0 8rpx 30rpx rgba(29, 33, 41, 0.12);
+
+  /* 主按钮渐变 */
+  --gradient-primary: linear-gradient(135deg, #ff8c42 0%, #ff6b35 100%);
+
+  background: var(--color-bg);
   font-size: 28rpx;
-  color: #333;
-  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+  color: var(--color-text-1);
+  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "PingFang SC", sans-serif;
 }
 
-/* 通用橙色按钮 */
+/* 通用主按钮：渐变 + 按压反馈 */
 .btn-primary {
-  background: #ff7a3c;
+  background: var(--gradient-primary);
   color: #fff;
-  border-radius: 40rpx;
+  border-radius: var(--radius-pill);
   font-size: 30rpx;
+  box-shadow: 0 8rpx 20rpx rgba(255, 107, 53, 0.35);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
+.btn-primary:active {
+  transform: scale(0.97);
+  box-shadow: 0 4rpx 10rpx rgba(255, 107, 53, 0.25);
+}
+.btn-primary::after { border: none; }
 
-.btn-primary::after {
-  border: none;
+/* 通用卡片 */
+.card-base {
+  background: var(--color-card);
+  border-radius: var(--radius-l);
+  box-shadow: var(--shadow-card);
 }
