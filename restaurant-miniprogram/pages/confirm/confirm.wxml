@@ -9,7 +9,7 @@
     </view>
     <view class="row" wx:for="{{cart}}" wx:key="id">
       <view class="row-left">
-        <text class="row-emoji">{{item.emoji}}</text>
+        <image class="row-img" src="{{item.image}}" mode="aspectFill"></image>
         <text class="name">{{item.name}}</text>
         <text class="count">× {{item.count}}</text>
       </view>

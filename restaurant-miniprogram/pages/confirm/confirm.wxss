@@ -36,7 +36,7 @@
   font-size: 28rpx;
 }
 .row-left { display: flex; align-items: center; flex: 1; overflow: hidden; }
-.row-emoji { font-size: 36rpx; margin-right: 14rpx; }
+.row-img { width: 64rpx; height: 64rpx; border-radius: var(--radius-s); margin-right: 14rpx; flex-shrink: 0; }
 .name { color: var(--color-text-1); }
 .count { color: var(--color-text-3); font-size: 24rpx; margin-left: 12rpx; }
 .right { display: flex; align-items: center; flex-shrink: 0; }

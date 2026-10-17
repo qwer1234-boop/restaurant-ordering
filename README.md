@@ -56,6 +56,12 @@ mvn spring-boot:run            # 或 java -jar target/restaurant-java-1.0.0.jar
 
 验证：浏览器打开 <http://localhost:8080/api/health> 返回 `code: 0` 即正常。
 
+> 一键启动：`C:\Users\syxlw\Restaurant\start_restaurant.bat` 会自动拉起 MySQL → 后端 → 打开开发者工具。
+
+## 三·五、菜品图片（本地资源）
+
+小程序已内置 14 张本地菜品图（13 道菜 + 1 张默认图），存放在 `restaurant-miniprogram/images/dishes/`，按菜品名称关联，加载失败自动回退默认图。**如何增删改图片**详见 [`restaurant-miniprogram/images/dishes/README.md`](restaurant-miniprogram/images/dishes/README.md)。
+
 ## 四、数据库（5 张表 + 1 个视图）
 
 | 表名 | 中文名 | 说明 |

@@ -1,6 +1,7 @@
 // pages/index/index.js 点餐主页
 const localData = require('../../data/dishes.js');
 const api = require('../../utils/api.js');
+const dishImages = require('../../utils/dishImages.js');
 const app = getApp();
 
 Page({
@@ -55,6 +56,14 @@ Page({
       });
   },
 
+  // 图片加载失败回退默认图（防止删除/改错图片后显示空白）
+  onImgError(e) {
+    const id = e.currentTarget.dataset.id;
+    const def = dishImages.DEFAULT_IMAGE;
+    const dishes = this.data.dishes.map(d => d.id === id ? { ...d, image: def } : d);
+    this.setData({ dishes });
+  },
+
   // 附加展示标记：desc 字段映射、热销标签（销量前3）、售罄标记
   decorateDishes(dishes) {
     const top3 = [...dishes]
@@ -64,6 +73,7 @@ Page({
     return dishes.map(d => ({
       ...d,
       desc: d.description !== undefined ? d.description : d.desc,
+      image: dishImages.imageFor(d.name),   // 菜品本地图片（按名称匹配，缺省回退 default.jpg）
       hot: (d.sales || 0) > 0 && top3.indexOf(d.id) > -1,
       soldOut: typeof d.stock === 'number' && d.stock <= 0
     }));
@@ -116,7 +126,7 @@ Page({
     if (item) {
       item.count += 1;
     } else {
-      cart.push({ id: dish.id, name: dish.name, price: dish.price, emoji: dish.emoji, count: 1 });
+      cart.push({ id: dish.id, name: dish.name, price: dish.price, emoji: dish.emoji, image: dish.image, count: 1 });
     }
     this.refreshCart();
   },

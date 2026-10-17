@@ -1,5 +1,6 @@
 // pages/confirm/confirm.js 订单确认页
 const api = require('../../utils/api.js');
+const dishImages = require('../../utils/dishImages.js');
 const app = getApp();
 
 Page({
@@ -54,7 +55,8 @@ Page({
   },
 
   refresh() {
-    const cart = app.globalData.cart;
+    // 补菜品图片（正常情况下 index 加购时已带 image，这里兜底）
+    const cart = app.globalData.cart.map(i => ({ ...i, image: i.image || dishImages.imageFor(i.name) }));
     this.setData({
       cart,
       totalCount: cart.reduce((s, i) => s + i.count, 0),

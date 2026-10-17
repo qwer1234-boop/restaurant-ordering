@@ -1,5 +1,6 @@
 // pages/orders/orders.js 历史订单页
 const api = require('../../utils/api.js');
+const dishImages = require('../../utils/dishImages.js');
 const app = getApp();
 
 // 订单状态 → 标签样式类 / 进度步数 / 是否已取消
@@ -30,7 +31,10 @@ Page({
   loadOrders() {
     const localOrders = (app.globalData.orders || [])
       .filter(o => !o.fromServer)
-      .map(o => decorateOrder(o));
+      .map(o => decorateOrder({
+        ...o,
+        items: (o.items || []).map(i => ({ ...i, image: i.image || dishImages.imageFor(i.name) }))
+      }));
 
     api.getOrders(50)
       .then(list => {
@@ -41,7 +45,7 @@ Page({
           note: o.remark,
           // 保留原有的展开状态，避免刷新后收起
           expanded: this.isExpanded(o.orderNo),
-          items: o.items.map(i => ({ id: i.dishId, name: i.name, emoji: i.emoji, price: i.price, count: i.count })),
+          items: o.items.map(i => ({ id: i.dishId, name: i.name, emoji: i.emoji, image: dishImages.imageFor(i.name), price: i.price, count: i.count })),
           total: o.totalAmount,
           status: o.status,
           time: o.createdAt,

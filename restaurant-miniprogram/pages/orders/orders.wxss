@@ -179,10 +179,13 @@
 .detail-row {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   font-size: 26rpx;
   color: var(--color-text-1);
   padding: 8rpx 0;
 }
+.detail-dish { display: flex; align-items: center; }
+.detail-img { width: 52rpx; height: 52rpx; border-radius: 8rpx; margin-right: 12rpx; flex-shrink: 0; }
 .detail-price { color: var(--color-price); }
 .detail-note {
   font-size: 24rpx;

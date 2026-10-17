@@ -84,7 +84,7 @@
     <scroll-view class="dish-list" scroll-y>
       <view class="dish-card {{item.soldOut ? 'dish-soldout' : ''}}" wx:for="{{filteredDishes}}" wx:key="id">
         <view class="dish-cover">
-          <text class="dish-emoji">{{item.emoji}}</text>
+          <image class="dish-img" src="{{item.image}}" mode="aspectFill" binderror="onImgError" data-id="{{item.id}}"></image>
           <view class="hot-tag" wx:if="{{item.hot}}">🔥 热销</view>
         </view>
         <view class="dish-info">
@@ -122,7 +122,7 @@
     <scroll-view class="cart-items" scroll-y>
       <view class="cart-row" wx:for="{{cart}}" wx:key="id">
         <view class="cart-dish">
-          <text class="cart-emoji">{{item.emoji}}</text>
+          <image class="cart-img" src="{{item.image}}" mode="aspectFill"></image>
           <text class="cart-name">{{item.name}}</text>
         </view>
         <view class="cart-ops">

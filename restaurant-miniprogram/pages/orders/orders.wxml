@@ -58,7 +58,10 @@
     <!-- 展开的明细 -->
     <view class="order-detail {{item.expanded ? 'detail-open' : ''}}">
       <view class="detail-row" wx:for="{{item.items}}" wx:for-item="dish" wx:key="id">
-        <text>{{dish.emoji}} {{dish.name}} × {{dish.count}}</text>
+        <view class="detail-dish">
+          <image class="detail-img" src="{{dish.image}}" mode="aspectFill"></image>
+          <text>{{dish.name}} × {{dish.count}}</text>
+        </view>
         <text class="detail-price">¥{{dish.count * dish.price}}</text>
       </view>
       <view class="detail-note" wx:if="{{item.note}}">备注：{{item.note}}</view>
