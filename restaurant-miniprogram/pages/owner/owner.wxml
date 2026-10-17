@@ -1,0 +1,79 @@
+<view class="owner-page">
+  <!-- 顶部统计卡片 -->
+  <view class="stat-bar" wx:if="{{summary}}">
+    <view class="stat-item">
+      <view class="stat-num">{{summary.todayOrders || 0}}</view>
+      <view class="stat-label">今日订单</view>
+    </view>
+    <view class="stat-divider"></view>
+    <view class="stat-item">
+      <view class="stat-num">¥{{summary.todayRevenue || 0}}</view>
+      <view class="stat-label">今日营业额</view>
+    </view>
+    <view class="stat-divider"></view>
+    <view class="stat-item">
+      <view class="stat-num">{{summary.pendingOrders || 0}}</view>
+      <view class="stat-label">待接单</view>
+    </view>
+  </view>
+
+  <!-- 热销榜 -->
+  <view class="top-block" wx:if="{{topDishes.length}}">
+    <view class="block-title">热销榜</view>
+    <view class="top-list">
+      <view class="top-item" wx:for="{{topDishes}}" wx:key="name">
+        <view class="top-rank rank-{{index}}">{{index + 1}}</view>
+        <view class="top-name">{{item.name}}</view>
+        <view class="top-sales">{{item.sales}} 份</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 筛选 tab -->
+  <view class="tabs">
+    <view class="tab {{activeTab === 'all' ? 'active' : ''}}" data-tab="all" bindtap="onTab">全部</view>
+    <view class="tab {{activeTab === 'pending' ? 'active' : ''}}" data-tab="pending" bindtap="onTab">待接单</view>
+    <view class="tab {{activeTab === 'cooking' ? 'active' : ''}}" data-tab="cooking" bindtap="onTab">制作中</view>
+    <view class="tab {{activeTab === 'done' ? 'active' : ''}}" data-tab="done" bindtap="onTab">已完成</view>
+  </view>
+
+  <!-- 订单列表 -->
+  <view class="order-list" wx:if="{{filtered.length}}">
+    <view class="order-card status-{{item.statusType}}" wx:for="{{filtered}}" wx:key="id">
+      <view class="order-head">
+        <view class="order-no">{{item.id}}</view>
+        <view class="order-status">{{item.status}}</view>
+      </view>
+
+      <view class="order-meta">
+        <text class="meta-tag">桌号 {{item.tableNo || '-'}}</text>
+        <text class="meta-time">{{item.time}}</text>
+      </view>
+
+      <view class="order-items">
+        <view class="item-row" wx:for="{{item.items}}" wx:for-item="dish" wx:key="name">
+          <text class="item-name">{{dish.name}}</text>
+          <text class="item-count">×{{dish.count}}</text>
+        </view>
+      </view>
+
+      <view class="order-foot">
+        <view class="order-total">合计 ¥{{item.total}}</view>
+        <view class="btn-action" wx:if="{{item.actionText}}" data-no="{{item.id}}" catchtap="onAction">
+          {{item.actionText}}
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty" wx:if="{{!loading && !filtered.length}}">
+    <view class="empty-icon">📋</view>
+    <view class="empty-text">暂无订单</view>
+  </view>
+
+  <!-- 底部操作 -->
+  <view class="footer">
+    <view class="btn-logout" bindtap="onLogout">退出老板模式</view>
+  </view>
+</view>

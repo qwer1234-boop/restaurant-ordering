@@ -2,7 +2,9 @@
   "pages": [
     "pages/index/index",
     "pages/orders/orders",
-    "pages/confirm/confirm"
+    "pages/confirm/confirm",
+    "pages/owner-login/owner-login",
+    "pages/owner/owner"
   ],
   "window": {
     "navigationBarBackgroundColor": "#ff6b35",

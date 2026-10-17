@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "老板看板",
+  "navigationBarBackgroundColor": "#2c2c2a",
+  "navigationBarTextStyle": "white",
+  "enablePullDownRefresh": true,
+  "backgroundTextStyle": "dark"
+}

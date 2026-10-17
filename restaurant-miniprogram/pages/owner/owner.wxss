@@ -1,0 +1,272 @@
+.owner-page {
+  min-height: 100vh;
+  background: #f7f8fa;
+  padding-bottom: 140rpx;
+  box-sizing: border-box;
+}
+
+/* 顶部统计 */
+.stat-bar {
+  background: #2c2c2a;
+  display: flex;
+  align-items: center;
+  padding: 36rpx 20rpx;
+}
+
+.stat-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stat-num {
+  font-size: 44rpx;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.stat-label {
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  color: #86909c;
+}
+
+.stat-divider {
+  width: 1px;
+  height: 60rpx;
+  background: #4e4e4c;
+}
+
+/* 热销榜 */
+.top-block {
+  margin: 24rpx 24rpx 0;
+  background: #ffffff;
+  border-radius: 16rpx;
+  padding: 28rpx;
+}
+
+.block-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #1d2129;
+  margin-bottom: 20rpx;
+}
+
+.top-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.top-item {
+  display: flex;
+  align-items: center;
+  padding: 14rpx 0;
+}
+
+.top-rank {
+  width: 40rpx;
+  height: 40rpx;
+  line-height: 40rpx;
+  text-align: center;
+  border-radius: 8rpx;
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #ffffff;
+  background: #86909c;
+}
+
+.rank-0 { background: #ff6b35; }
+.rank-1 { background: #f77234; }
+.rank-2 { background: #f7a35c; }
+
+.top-name {
+  flex: 1;
+  margin-left: 20rpx;
+  font-size: 28rpx;
+  color: #1d2129;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.top-sales {
+  font-size: 26rpx;
+  color: #86909c;
+}
+
+/* 筛选 tab */
+.tabs {
+  display: flex;
+  margin: 24rpx 24rpx 0;
+  background: #ffffff;
+  border-radius: 16rpx;
+  padding: 8rpx;
+}
+
+.tab {
+  flex: 1;
+  text-align: center;
+  padding: 18rpx 0;
+  font-size: 28rpx;
+  color: #86909c;
+  border-radius: 12rpx;
+}
+
+.tab.active {
+  background: #2c2c2a;
+  color: #ffffff;
+  font-weight: 500;
+}
+
+/* 订单卡片 */
+.order-list {
+  margin: 24rpx 24rpx 0;
+}
+
+.order-card {
+  background: #ffffff;
+  border-radius: 16rpx;
+  padding: 28rpx;
+  margin-bottom: 20rpx;
+  border-left: 8rpx solid #c9cdd4;
+}
+
+.status-pending { border-left-color: #ff6b35; }
+.status-cooking { border-left-color: #f7a35c; }
+.status-done { border-left-color: #00b42a; }
+.status-cancel { border-left-color: #c9cdd4; }
+
+.order-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.order-no {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #1d2129;
+}
+
+.order-status {
+  font-size: 24rpx;
+  padding: 6rpx 16rpx;
+  border-radius: 8rpx;
+  background: #f7f8fa;
+  color: #4e5969;
+}
+
+.status-pending .order-status { background: #fff3e8; color: #ff6b35; }
+.status-cooking .order-status { background: #fff7e8; color: #f77234; }
+.status-done .order-status { background: #e8ffea; color: #00b42a; }
+
+.order-meta {
+  display: flex;
+  margin-top: 16rpx;
+}
+
+.meta-tag {
+  font-size: 24rpx;
+  color: #4e5969;
+  background: #f2f3f5;
+  padding: 6rpx 16rpx;
+  border-radius: 8rpx;
+  margin-right: 16rpx;
+}
+
+.meta-time {
+  font-size: 24rpx;
+  color: #86909c;
+  line-height: 40rpx;
+}
+
+.order-items {
+  margin-top: 16rpx;
+  padding-top: 16rpx;
+  border-top: 1px solid #f2f3f5;
+}
+
+.item-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8rpx 0;
+}
+
+.item-name {
+  font-size: 26rpx;
+  color: #4e5969;
+}
+
+.item-count {
+  font-size: 26rpx;
+  color: #86909c;
+}
+
+.order-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16rpx;
+}
+
+.order-total {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #ff6b35;
+}
+
+.btn-action {
+  padding: 14rpx 40rpx;
+  background: #ff6b35;
+  color: #ffffff;
+  font-size: 28rpx;
+  border-radius: 40rpx;
+}
+
+.btn-action:active {
+  opacity: 0.85;
+}
+
+/* 空状态 */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 120rpx 0;
+}
+
+.empty-icon {
+  font-size: 100rpx;
+}
+
+.empty-text {
+  margin-top: 20rpx;
+  font-size: 28rpx;
+  color: #86909c;
+}
+
+/* 底部退出按钮 */
+.footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 20rpx 24rpx calc(20rpx + env(safe-area-inset-bottom));
+  background: #ffffff;
+  box-shadow: 0 -4rpx 16rpx rgba(0, 0, 0, 0.04);
+}
+
+.btn-logout {
+  height: 88rpx;
+  line-height: 88rpx;
+  text-align: center;
+  background: #f2f3f5;
+  color: #4e5969;
+  font-size: 30rpx;
+  border-radius: 16rpx;
+}
+
+.btn-logout:active {
+  opacity: 0.85;
+}

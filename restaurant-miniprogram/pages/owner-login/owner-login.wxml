@@ -1,0 +1,26 @@
+<view class="login-page">
+  <view class="login-card {{shaking ? 'shake' : ''}}">
+    <view class="login-icon">👨‍🍳</view>
+    <view class="login-title">老板模式</view>
+    <view class="login-sub">请输入老板密码进入订单看板</view>
+
+    <input
+      class="pwd-input"
+      type="number"
+      password
+      maxlength="8"
+      placeholder="请输入密码"
+      placeholder-class="pwd-placeholder"
+      value="{{pwd}}"
+      bindinput="onInput"
+      bindconfirm="onLogin"
+    />
+
+    <view class="error-tip" wx:if="{{error}}">{{error}}</view>
+
+    <view class="btn-login" bindtap="onLogin">进入看板</view>
+    <view class="btn-cancel" bindtap="onCancel">返回</view>
+  </view>
+
+  <view class="login-hint">默认密码：8888（演示用）</view>
+</view>

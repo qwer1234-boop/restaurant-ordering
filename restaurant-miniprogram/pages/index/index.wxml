@@ -5,9 +5,12 @@
   <view class="header">
     <view class="shop-row">
       <text class="shop-name">🍜 美味餐厅</text>
-      <view class="status-pill {{dataSource === 'server' ? 'status-online' : 'status-offline'}}">
-        <view class="status-dot"></view>
-        <text>{{dataSource === 'server' ? '已连接后厨' : '离线模式'}}</text>
+      <view class="shop-right">
+        <view class="status-pill {{dataSource === 'server' ? 'status-online' : 'status-offline'}}">
+          <view class="status-dot"></view>
+          <text>{{dataSource === 'server' ? '已连接后厨' : '离线模式'}}</text>
+        </view>
+        <view class="owner-entry" bindtap="onOwnerTap">老板入口</view>
       </view>
     </view>
     <view class="shop-sub">堂食点餐 · 免排队 · 下单后自动通知后厨</view>

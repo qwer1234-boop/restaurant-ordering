@@ -12,6 +12,10 @@ App({
     // 订单缓存（后端可用时以后端数据为准，否则作为离线兜底）
     orders: [],
     // 后端是否可用（由菜单接口的调用结果决定）
-    apiOnline: false
+    apiOnline: false,
+    // 老板端：是否已通过密码校验
+    isOwner: false,
+    // 老板密码（默认 8888，可在此修改）
+    ownerPassword: '8888'
   }
 });
