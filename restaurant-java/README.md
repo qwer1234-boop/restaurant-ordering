@@ -79,9 +79,20 @@ java -jar target/restaurant-java-1.0.0.jar
 | GET | `/api/orders?status=待处理&limit=20` | 订单列表（含明细） |
 | GET | `/api/orders/{orderNo}` | 订单详情 |
 | PUT | `/api/orders/{orderNo}/status` | 更新订单状态 |
-| GET | `/api/stats/summary` | 经营概况 |
+| GET | `/api/stats/summary` | 经营概况（含待处理订单数） |
 | GET | `/api/stats/top?limit=5` | 菜品销量排行（聚合查询） |
 | GET | `/api/stats/category` | 分类营业额占比（多表联查） |
+| POST | `/api/owner/login` | 老板登录（默认密码 8888） |
+| GET | `/api/owner/orders?status=待处理` | 老板订单列表（需令牌） |
+| PUT | `/api/owner/orders/{orderNo}/status` | 接单 / 出餐 / 取消（需令牌） |
+| GET | `/api/owner/dishes` | 全部菜品，含停售（需令牌） |
+| POST | `/api/owner/dishes` | 新增菜品（需令牌） |
+| PUT | `/api/owner/dishes/{id}` | 编辑菜品（需令牌） |
+| PUT | `/api/owner/dishes/{id}/status` | 上架 / 停售（需令牌） |
+| GET | `/api/owner/stats` | 老板经营统计（需令牌） |
+
+> 老板端登录成功返回 `token` 和 `expiresIn`，后续请求带请求头 `X-Owner-Token: <token>`。
+> 密码配置在 `application.yml` 的 `app.owner.password`，可用环境变量 `OWNER_PASSWORD` 覆盖。
 
 ### 下单请求示例
 
@@ -102,14 +113,14 @@ restaurant-java/
 ├── src/main/java/com/restaurant/
 │   ├── RestaurantApplication.java  启动类
 │   ├── common/                     Result 统一响应、BizException、全局异常处理
-│   ├── config/                     CorsConfig 跨域配置
-│   ├── controller/                 接口层：Menu / Order / Stats / Health
-│   ├── service/                    业务层：MenuService、OrderService、StatsService、TableService
+│   ├── config/                     CorsConfig 跨域、OwnerAuthInterceptor 老板端鉴权
+│   ├── controller/                 接口层：Menu / Order / Stats / Health / Owner
+│   ├── service/                    业务层：Menu / Order / Stats / Table / OwnerAuth
 │   ├── mapper/                     数据访问接口（MyBatis）
 │   ├── entity/                     实体类：Category / Dish / DiningTable / Order / OrderItem
 │   └── dto/                        请求参数对象（含校验注解）
 └── src/main/resources/
-    ├── application.yml             数据源、MyBatis、端口配置
+    ├── application.yml             数据源、MyBatis、端口、老板端密码配置
     └── mapper/*.xml                SQL 映射文件（4 个）
 ```
 
@@ -123,3 +134,5 @@ restaurant-java/
 6. **快照设计**：`order_item` 冗余保存 `dish_name`、`price`，保证历史订单金额不因菜品改价而变化。
 7. **状态机与库存回滚**：订单状态限定为 待处理 → 制作中 → 已完成 / 已取消；取消时自动回退库存与销量，并重算餐桌占用状态。
 8. **外键与索引**：`order_item.order_id` 外键级联删除，配合 `idx_orders_created`、`idx_item_order` 等索引提升查询效率。
+9. **老板端鉴权**：`POST /api/owner/login` 校验密码并签发 8 小时内存令牌，`OwnerAuthInterceptor` 统一拦截 `/api/owner/**`。
+10. **菜品软下架**：老板端只改 `dish.status`，不删除菜品，历史订单仍可依靠快照完整展示。

@@ -19,7 +19,7 @@ public class StatsService {
 
     private final StatsMapper statsMapper;
 
-    /** 经营概况：累计 / 今日订单数、营业额、客单价、餐桌占用 */
+    /** 经营概况：累计 / 今日订单数、营业额、客单价、餐桌占用、待处理订单 */
     public Map<String, Object> summary() {
         Map<String, Object> total = statsMapper.selectTotal();
         Map<String, Object> today = statsMapper.selectToday();
@@ -37,6 +37,7 @@ public class StatsService {
         result.put("total", total);
         result.put("today", today);
         result.put("tableStat", tableStat);
+        result.put("pendingOrders", statsMapper.selectPendingCount());
         return result;
     }
 

@@ -2,18 +2,32 @@
   <!-- 顶部统计卡片 -->
   <view class="stat-bar" wx:if="{{summary}}">
     <view class="stat-item">
-      <view class="stat-num">{{summary.todayOrders || 0}}</view>
+      <view class="stat-num">{{summary.today.orderCount || 0}}</view>
       <view class="stat-label">今日订单</view>
     </view>
     <view class="stat-divider"></view>
     <view class="stat-item">
-      <view class="stat-num">¥{{summary.todayRevenue || 0}}</view>
+      <view class="stat-num">¥{{summary.today.turnover || 0}}</view>
       <view class="stat-label">今日营业额</view>
     </view>
     <view class="stat-divider"></view>
     <view class="stat-item">
       <view class="stat-num">{{summary.pendingOrders || 0}}</view>
-      <view class="stat-label">待接单</view>
+      <view class="stat-label">待处理</view>
+    </view>
+  </view>
+
+  <!-- 快捷入口 -->
+  <view class="quick-grid">
+    <view class="quick-card" bindtap="onOpenDishes">
+      <view class="quick-icon">🍽️</view>
+      <view class="quick-text">菜品管理</view>
+      <view class="quick-sub">价格 / 库存 / 上下架</view>
+    </view>
+    <view class="quick-card" bindtap="onOpenStats">
+      <view class="quick-icon">📈</view>
+      <view class="quick-text">经营统计</view>
+      <view class="quick-sub">营业额 / 热销 / 分类</view>
     </view>
   </view>
 
@@ -21,10 +35,10 @@
   <view class="top-block" wx:if="{{topDishes.length}}">
     <view class="block-title">热销榜</view>
     <view class="top-list">
-      <view class="top-item" wx:for="{{topDishes}}" wx:key="name">
+      <view class="top-item" wx:for="{{topDishes}}" wx:key="dishId">
         <view class="top-rank rank-{{index}}">{{index + 1}}</view>
         <view class="top-name">{{item.name}}</view>
-        <view class="top-sales">{{item.sales}} 份</view>
+        <view class="top-sales">{{item.soldCount}} 份</view>
       </view>
     </view>
   </view>
@@ -32,9 +46,10 @@
   <!-- 筛选 tab -->
   <view class="tabs">
     <view class="tab {{activeTab === 'all' ? 'active' : ''}}" data-tab="all" bindtap="onTab">全部</view>
-    <view class="tab {{activeTab === 'pending' ? 'active' : ''}}" data-tab="pending" bindtap="onTab">待接单</view>
+    <view class="tab {{activeTab === 'pending' ? 'active' : ''}}" data-tab="pending" bindtap="onTab">待处理</view>
     <view class="tab {{activeTab === 'cooking' ? 'active' : ''}}" data-tab="cooking" bindtap="onTab">制作中</view>
     <view class="tab {{activeTab === 'done' ? 'active' : ''}}" data-tab="done" bindtap="onTab">已完成</view>
+    <view class="tab {{activeTab === 'cancelled' ? 'active' : ''}}" data-tab="cancelled" bindtap="onTab">已取消</view>
   </view>
 
   <!-- 订单列表 -->
@@ -50,17 +65,22 @@
         <text class="meta-time">{{item.time}}</text>
       </view>
 
+      <view class="order-note" wx:if="{{item.note}}">备注：{{item.note}}</view>
+
       <view class="order-items">
         <view class="item-row" wx:for="{{item.items}}" wx:for-item="dish" wx:key="name">
-          <text class="item-name">{{dish.name}}</text>
+          <text class="item-name">{{dish.emoji}} {{dish.name}}</text>
           <text class="item-count">×{{dish.count}}</text>
         </view>
       </view>
 
       <view class="order-foot">
         <view class="order-total">合计 ¥{{item.total}}</view>
-        <view class="btn-action" wx:if="{{item.actionText}}" data-no="{{item.id}}" catchtap="onAction">
-          {{item.actionText}}
+        <view class="order-actions">
+          <view class="btn-cancel-order" wx:if="{{item.canCancel}}" data-no="{{item.id}}" catchtap="onCancel">取消</view>
+          <view class="btn-action" wx:if="{{item.actionText}}" data-no="{{item.id}}" catchtap="onAction">
+            {{item.actionText}}
+          </view>
         </view>
       </view>
     </view>

@@ -18,7 +18,9 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 /**
  * 订单业务：下单、查询、状态流转
@@ -33,7 +35,21 @@ import java.util.Random;
 public class OrderService {
 
     /** 允许的订单状态（状态机约束） */
-    public static final List<String> ORDER_STATUS = List.of("待处理", "制作中", "已完成", "已取消");
+    public static final String STATUS_PENDING = "待处理";
+    public static final String STATUS_COOKING = "制作中";
+    public static final String STATUS_DONE = "已完成";
+    public static final String STATUS_CANCELLED = "已取消";
+    public static final List<String> ORDER_STATUS =
+            List.of(STATUS_PENDING, STATUS_COOKING, STATUS_DONE, STATUS_CANCELLED);
+
+    /** 正向流转：待处理 → 制作中 → 已完成；待处理 / 制作中都可以取消 */
+    private static final Map<String, Set<String>> TRANSITIONS = Map.of(
+            STATUS_PENDING, Set.of(STATUS_COOKING, STATUS_CANCELLED),
+            STATUS_COOKING, Set.of(STATUS_DONE, STATUS_CANCELLED),
+            STATUS_DONE, Set.of(),
+            STATUS_CANCELLED, Set.of()
+    );
+
 
     private static final DateTimeFormatter NO_FORMAT = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
     private static final Random RANDOM = new Random();
@@ -96,7 +112,7 @@ public class OrderService {
         order.setTotalAmount(totalAmount);
         order.setItemCount(itemCount);
         order.setRemark(dto.getRemark() == null ? "" : dto.getRemark());
-        order.setStatus("待处理");
+        order.setStatus(STATUS_PENDING);
         orderMapper.insertOrder(order);
 
         // 4. 写入明细，并扣减库存、累加销量
@@ -146,18 +162,19 @@ public class OrderService {
         if (order == null) {
             throw new BizException("订单不存在", 404);
         }
-        if ("已取消".equals(order.getStatus())) {
-            throw new BizException("该订单已取消，请勿重复操作");
+        Set<String> allowed = TRANSITIONS.getOrDefault(order.getStatus(), Set.of());
+        if (!allowed.contains(status)) {
+            throw new BizException("订单状态不能从「" + order.getStatus() + "」变为「" + status + "」");
         }
 
         orderMapper.updateStatus(order.getId(), status);
 
-        if ("已取消".equals(status)) {
+        if (STATUS_CANCELLED.equals(status)) {
             for (OrderItem item : orderMapper.selectItemsByOrderId(order.getId())) {
                 menuMapper.rollbackSalesAndStock(item.getDishId(), item.getCount());
             }
         }
-        if ("已完成".equals(status) || "已取消".equals(status)) {
+        if (STATUS_DONE.equals(status) || STATUS_CANCELLED.equals(status)) {
             tableMapper.refreshStatusByActiveOrders(order.getTableNo());
         }
 

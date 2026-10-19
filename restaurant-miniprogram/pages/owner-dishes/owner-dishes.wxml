@@ -1,0 +1,85 @@
+<view class="dishes-page">
+  <view class="page-head">
+    <view>
+      <view class="page-title">菜品管理</view>
+      <view class="page-sub">共 {{dishes.length}} 道菜 · 可维护价格、库存和上下架</view>
+    </view>
+    <view class="btn-add" bindtap="onAdd">＋ 新增</view>
+  </view>
+
+  <view class="dish-list" wx:if="{{dishes.length}}">
+    <view class="dish-card {{item.status === 0 ? 'off-shelf' : ''}}" wx:for="{{dishes}}" wx:key="id">
+      <view class="dish-main">
+        <view class="dish-emoji">{{item.emoji || '🍽️'}}</view>
+        <view class="dish-info">
+          <view class="dish-name-row">
+            <text class="dish-name">{{item.name}}</text>
+            <text class="dish-status {{item.status === 1 ? 'on' : 'off'}}">{{item.status === 1 ? '在售' : '停售'}}</text>
+          </view>
+          <view class="dish-meta">{{item.categoryName}} · ¥{{item.price}} · 库存 {{item.stock}}</view>
+          <view class="dish-desc" wx:if="{{item.description}}">{{item.description}}</view>
+        </view>
+      </view>
+      <view class="dish-actions">
+        <view class="btn-edit" data-id="{{item.id}}" bindtap="onEdit">编辑</view>
+        <view class="btn-toggle {{item.status === 1 ? 'off' : 'on'}}" data-id="{{item.id}}" data-status="{{item.status}}" bindtap="onToggle">
+          {{item.status === 1 ? '下架' : '上架'}}
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="empty" wx:if="{{!loading && !dishes.length}}">
+    <view class="empty-icon">🍽️</view>
+    <view class="empty-text">还没有菜品，点击右上角新增</view>
+  </view>
+
+  <!-- 编辑弹层 -->
+  <view class="mask" wx:if="{{editorVisible}}" bindtap="onClose">
+    <view class="editor" catchtap="noop">
+      <view class="editor-title">{{editingId ? '编辑菜品' : '新增菜品'}}</view>
+
+      <view class="form-row">
+        <text class="form-label">分类</text>
+        <picker class="form-picker" range="{{categories}}" range-key="name" value="{{form.categoryIndex}}" bindchange="onCategoryChange">
+          <view class="picker-value">{{categories[form.categoryIndex].name || '请选择'}}</view>
+        </picker>
+      </view>
+
+      <view class="form-row">
+        <text class="form-label">名称</text>
+        <input class="form-input" maxlength="64" placeholder="如：宫保鸡丁" value="{{form.name}}" data-field="name" bindinput="onInput" />
+      </view>
+
+      <view class="form-row">
+        <text class="form-label">图标</text>
+        <input class="form-input" maxlength="16" placeholder="如：🍗" value="{{form.emoji}}" data-field="emoji" bindinput="onInput" />
+      </view>
+
+      <view class="form-row">
+        <text class="form-label">价格</text>
+        <input class="form-input" type="digit" placeholder="0.00" value="{{form.price}}" data-field="price" bindinput="onInput" />
+      </view>
+
+      <view class="form-row">
+        <text class="form-label">库存</text>
+        <input class="form-input" type="number" placeholder="0" value="{{form.stock}}" data-field="stock" bindinput="onInput" />
+      </view>
+
+      <view class="form-row">
+        <text class="form-label">简介</text>
+        <input class="form-input" maxlength="255" placeholder="选填" value="{{form.description}}" data-field="description" bindinput="onInput" />
+      </view>
+
+      <view class="form-row">
+        <text class="form-label">在售</text>
+        <switch checked="{{form.status === 1}}" color="#ff6b35" bindchange="onStatusChange" />
+      </view>
+
+      <view class="editor-actions">
+        <view class="btn-editor-cancel" bindtap="onClose">取消</view>
+        <view class="btn-editor-save {{saving ? 'disabled' : ''}}" bindtap="onSave">{{saving ? '保存中...' : '保存'}}</view>
+      </view>
+    </view>
+  </view>
+</view>

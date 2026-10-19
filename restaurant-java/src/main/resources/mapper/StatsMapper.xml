@@ -28,6 +28,13 @@
           FROM dining_table
     </select>
 
+    <!-- 待处理订单数 -->
+    <select id="selectPendingCount" resultType="int">
+        SELECT COUNT(*)
+          FROM orders
+         WHERE status = '待处理'
+    </select>
+
     <!-- 菜品销量排行 TOP N -->
     <select id="selectTopDishes" resultType="map">
         SELECT i.dish_id  AS dishId,

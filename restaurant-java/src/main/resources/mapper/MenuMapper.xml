@@ -45,6 +45,54 @@
          WHERE id = #{id}
     </select>
 
+    <!-- 老板端：全部菜品（含停售） -->
+    <select id="selectAllDishes" resultType="com.restaurant.entity.Dish">
+        SELECT d.id,
+               d.category_id,
+               c.name AS category_name,
+               d.name,
+               d.price,
+               d.emoji,
+               d.description,
+               d.sales,
+               d.stock,
+               d.status,
+               d.created_at
+          FROM dish d
+          JOIN category c ON c.id = d.category_id
+         ORDER BY d.status DESC, d.category_id ASC, d.id DESC
+    </select>
+
+    <select id="selectCategoryById" resultType="com.restaurant.entity.Category">
+        SELECT id, name, sort_order, created_at
+          FROM category
+         WHERE id = #{id}
+    </select>
+
+    <insert id="insertDish" parameterType="com.restaurant.entity.Dish"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO dish (category_id, name, price, emoji, description, sales, stock, status)
+        VALUES (#{categoryId}, #{name}, #{price}, #{emoji}, #{description}, 0, #{stock}, #{status})
+    </insert>
+
+    <update id="updateDish" parameterType="com.restaurant.entity.Dish">
+        UPDATE dish
+           SET category_id = #{categoryId},
+               name = #{name},
+               price = #{price},
+               emoji = #{emoji},
+               description = #{description},
+               stock = #{stock},
+               status = #{status}
+         WHERE id = #{id}
+    </update>
+
+    <update id="updateDishStatus">
+        UPDATE dish
+           SET status = #{status}
+         WHERE id = #{id}
+    </update>
+
     <!-- 下单成功后：销量增加、库存扣减（一条 SQL 保证原子性） -->
     <update id="addSalesAndDecreaseStock">
         UPDATE dish

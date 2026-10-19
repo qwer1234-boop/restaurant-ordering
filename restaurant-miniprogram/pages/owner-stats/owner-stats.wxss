@@ -1,0 +1,178 @@
+.stats-page {
+  min-height: 100vh;
+  background: #f7f8fa;
+  padding-bottom: 60rpx;
+  box-sizing: border-box;
+}
+
+.hero {
+  padding: 36rpx 30rpx 46rpx;
+  background: #2c2c2a;
+}
+
+.hero-title {
+  font-size: 40rpx;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.hero-sub {
+  margin-top: 10rpx;
+  font-size: 24rpx;
+  color: #a9a9a6;
+}
+
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18rpx;
+  margin: -26rpx 24rpx 0;
+}
+
+.grid-card {
+  width: calc(50% - 9rpx);
+  background: #ffffff;
+  border-radius: 16rpx;
+  padding: 28rpx;
+  box-sizing: border-box;
+}
+
+.grid-num {
+  font-size: 38rpx;
+  font-weight: 600;
+  color: #ff6b35;
+}
+
+.grid-label {
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  color: #86909c;
+}
+
+.card {
+  margin: 24rpx 24rpx 0;
+  background: #ffffff;
+  border-radius: 16rpx;
+  padding: 28rpx;
+}
+
+.card-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #1d2129;
+  margin-bottom: 18rpx;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14rpx 0;
+  border-bottom: 1px solid #f7f8fa;
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+.row-label {
+  font-size: 26rpx;
+  color: #4e5969;
+}
+
+.row-value {
+  font-size: 28rpx;
+  color: #1d2129;
+}
+
+.row-value.strong {
+  color: #ff6b35;
+  font-weight: 600;
+}
+
+.rank-row {
+  display: flex;
+  align-items: center;
+  padding: 12rpx 0;
+}
+
+.rank-index {
+  width: 40rpx;
+  height: 40rpx;
+  line-height: 40rpx;
+  text-align: center;
+  border-radius: 8rpx;
+  font-size: 24rpx;
+  font-weight: 600;
+  color: #ffffff;
+  background: #86909c;
+}
+
+.rank-0 { background: #ff6b35; }
+.rank-1 { background: #f77234; }
+.rank-2 { background: #f7a35c; }
+
+.rank-name {
+  flex: 1;
+  margin-left: 20rpx;
+  font-size: 27rpx;
+  color: #1d2129;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rank-count {
+  font-size: 24rpx;
+  color: #86909c;
+}
+
+.bar-row {
+  margin-bottom: 20rpx;
+}
+
+.bar-head {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8rpx;
+}
+
+.bar-name {
+  font-size: 26rpx;
+  color: #4e5969;
+}
+
+.bar-value {
+  font-size: 24rpx;
+  color: #86909c;
+}
+
+.bar-track {
+  height: 14rpx;
+  background: #f2f3f5;
+  border-radius: 7rpx;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  background: #ff6b35;
+  border-radius: 7rpx;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 120rpx 0;
+}
+
+.empty-icon {
+  font-size: 100rpx;
+}
+
+.empty-text {
+  margin-top: 20rpx;
+  font-size: 28rpx;
+  color: #86909c;
+}

@@ -77,6 +77,10 @@
   opacity: 0.85;
 }
 
+.btn-login.disabled {
+  opacity: 0.55;
+}
+
 .btn-cancel {
   margin-top: 24rpx;
   font-size: 28rpx;

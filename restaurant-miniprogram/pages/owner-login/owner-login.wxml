@@ -12,15 +12,18 @@
       placeholder="请输入密码"
       placeholder-class="pwd-placeholder"
       value="{{pwd}}"
+      disabled="{{loading}}"
       bindinput="onInput"
       bindconfirm="onLogin"
     />
 
     <view class="error-tip" wx:if="{{error}}">{{error}}</view>
 
-    <view class="btn-login" bindtap="onLogin">进入看板</view>
+    <view class="btn-login {{loading ? 'disabled' : ''}}" bindtap="onLogin">
+      {{loading ? '登录中...' : '进入看板'}}
+    </view>
     <view class="btn-cancel" bindtap="onCancel">返回</view>
   </view>
 
-  <view class="login-hint">默认密码：8888（演示用）</view>
+  <view class="login-hint">演示密码：8888（可在后端 application.yml 修改）</view>
 </view>

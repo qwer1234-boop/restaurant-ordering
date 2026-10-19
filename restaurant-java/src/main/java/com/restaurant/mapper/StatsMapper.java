@@ -19,6 +19,9 @@ public interface StatsMapper {
     /** 餐桌占用情况 */
     Map<String, Object> selectTableStat();
 
+    /** 待处理订单数（老板端看板） */
+    Integer selectPendingCount();
+
     /** 菜品销量排行 TOP N */
     List<Map<String, Object>> selectTopDishes(@Param("limit") Integer limit);
 

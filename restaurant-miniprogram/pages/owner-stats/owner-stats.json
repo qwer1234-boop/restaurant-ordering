@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "经营统计",
+  "navigationBarBackgroundColor": "#2c2c2a",
+  "navigationBarTextStyle": "white",
+  "enablePullDownRefresh": true,
+  "backgroundTextStyle": "dark"
+}

@@ -1,42 +1,41 @@
 // pages/owner-login/owner-login.js 老板端登录页
-// 通过密码区分老板与顾客，校验通过后进入订单看板
+// 密码由后端 /api/owner/login 校验，登录成功后保存短期令牌
+const api = require('../../utils/api.js');
 const app = getApp();
-
-// 老板密码（默认 8888，可在 app.globalData.ownerPassword 覆盖）
-const DEFAULT_PASSWORD = '8888';
 
 Page({
   data: {
-    pwd: '',          // 输入的密码
-    error: '',        // 错误提示
-    shaking: false    // 密码错误抖动动画
+    pwd: '',
+    error: '',
+    shaking: false,
+    loading: false
   },
 
   onInput(e) {
     this.setData({ pwd: e.detail.value, error: '' });
   },
 
-  // 密码校验，通过则跳转老板端
   onLogin() {
+    if (this.data.loading) return;
     const pwd = this.data.pwd.trim();
-    const expect = app.globalData.ownerPassword || DEFAULT_PASSWORD;
-
     if (!pwd) {
       this.setData({ error: '请输入老板密码' });
       return;
     }
-    if (pwd !== expect) {
-      // 错误提示 + 抖动
-      this.setData({ error: '密码错误，请重试', shaking: true });
-      setTimeout(() => this.setData({ shaking: false }), 400);
-      return;
-    }
 
-    app.globalData.isOwner = true;
-    wx.reLaunch({ url: '/pages/owner/owner' });
+    this.setData({ loading: true, error: '' });
+    api.ownerLogin(pwd)
+      .then(res => {
+        app.setOwnerSession(res.token, res.expiresIn);
+        wx.reLaunch({ url: '/pages/owner/owner' });
+      })
+      .catch(err => {
+        this.setData({ error: err.message || '登录失败', shaking: true });
+        setTimeout(() => this.setData({ shaking: false }), 400);
+      })
+      .then(() => this.setData({ loading: false }));
   },
 
-  // 取消返回
   onCancel() {
     wx.navigateBack();
   }

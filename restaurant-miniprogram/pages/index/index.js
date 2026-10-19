@@ -167,9 +167,11 @@ Page({
     this.refreshCart();
   },
 
-  // 老板入口：跳转老板登录页
+  // 老板入口：已登录直接进看板，否则去登录页
   onOwnerTap() {
-    wx.navigateTo({ url: '/pages/owner-login/owner-login' });
+    const app = getApp();
+    const url = app.globalData.isOwner ? '/pages/owner/owner' : '/pages/owner-login/owner-login';
+    wx.navigateTo({ url });
   },
 
   // 去结算

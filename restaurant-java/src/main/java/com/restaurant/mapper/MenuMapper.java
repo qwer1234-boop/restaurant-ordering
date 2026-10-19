@@ -21,6 +21,21 @@ public interface MenuMapper {
     /** 查询单个菜品 */
     Dish selectDishById(@Param("id") Integer id);
 
+    /** 老板端：查询全部菜品（含停售） */
+    List<Dish> selectAllDishes();
+
+    /** 查询单个分类 */
+    Category selectCategoryById(@Param("id") Integer id);
+
+    /** 老板端：新增菜品 */
+    int insertDish(Dish dish);
+
+    /** 老板端：编辑菜品 */
+    int updateDish(Dish dish);
+
+    /** 老板端：上架 / 停售 */
+    int updateDishStatus(@Param("id") Integer id, @Param("status") Integer status);
+
     /** 下单成功后：增加销量、扣减库存 */
     int addSalesAndDecreaseStock(@Param("dishId") Integer dishId,
                                  @Param("count") Integer count);

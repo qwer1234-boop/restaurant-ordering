@@ -4,7 +4,9 @@
     "pages/orders/orders",
     "pages/confirm/confirm",
     "pages/owner-login/owner-login",
-    "pages/owner/owner"
+    "pages/owner/owner",
+    "pages/owner-dishes/owner-dishes",
+    "pages/owner-stats/owner-stats"
   ],
   "window": {
     "navigationBarBackgroundColor": "#ff6b35",
