@@ -33,6 +33,7 @@ Page({
     this.loadAll();
   },
 
+  // 分类和菜品一起加载：分类用于下拉框，菜品用于列表
   loadAll() {
     return Promise.all([api.getCategories(), api.ownerGetDishes()])
       .then(([categories, dishes]) => {
@@ -44,6 +45,7 @@ Page({
       });
   },
 
+  // token 过期统一回登录页；其他错误提示后留在当前页
   handleAuthError(err) {
     if (err && (err.statusCode === 401 || err.code === 401)) {
       app.clearOwnerSession();
@@ -62,6 +64,7 @@ Page({
     });
   },
 
+  // 编辑：把当前菜品回填到表单，分类 ID 转成下拉框索引
   onEdit(e) {
     const id = e.currentTarget.dataset.id;
     const dish = this.data.dishes.find(d => d.id === id);
@@ -100,6 +103,7 @@ Page({
     this.setData({ editorVisible: false });
   },
 
+  // 保存前做前端基础校验，后端还有一层 @Valid 校验
   onSave() {
     if (this.data.saving) return;
     const form = this.data.form;
@@ -151,6 +155,7 @@ Page({
       .then(() => this.setData({ saving: false }));
   },
 
+  // 上架/停售：只改 status，停售不会删除菜品和历史订单
   onToggle(e) {
     const id = e.currentTarget.dataset.id;
     const status = Number(e.currentTarget.dataset.status);

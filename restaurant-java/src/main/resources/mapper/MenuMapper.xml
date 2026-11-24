@@ -93,7 +93,7 @@
          WHERE id = #{id}
     </update>
 
-    <!-- 下单成功后：销量增加、库存扣减（一条 SQL 保证原子性） -->
+    <!-- 下单成功后：销量增加、库存扣减（一条 SQL 同时改两列，避免两条 update 中间失败） -->
     <update id="addSalesAndDecreaseStock">
         UPDATE dish
            SET sales = sales + #{count},
@@ -101,7 +101,7 @@
          WHERE id = #{dishId}
     </update>
 
-    <!-- 取消订单：回退销量与库存 -->
+    <!-- 取消订单：按明细快照回退销量与库存 -->
     <update id="rollbackSalesAndStock">
         UPDATE dish
            SET sales = sales - #{count},

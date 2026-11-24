@@ -18,6 +18,7 @@ Page({
     this.load();
   },
 
+  // 拉取经营统计；分类营业额按最大值折算成 0–100 的条形图宽度
   load() {
     return api.ownerGetStats()
       .then(d => {
@@ -36,6 +37,7 @@ Page({
       })
       .catch(err => {
         this.setData({ loading: false });
+        // token 过期：清掉本地登录态，回登录页
         if (err && (err.statusCode === 401 || err.code === 401)) {
           app.clearOwnerSession();
           wx.reLaunch({ url: '/pages/owner-login/owner-login' });

@@ -16,6 +16,7 @@
         VALUES (#{orderId}, #{dishId}, #{name}, #{emoji}, #{price}, #{count}, #{subtotal})
     </insert>
 
+    <!-- 订单详情：按订单号查主表；明细由 Service 再查一次并组装 -->
     <select id="selectByOrderNo" resultType="com.restaurant.entity.Order">
         SELECT id, order_no, table_no, total_amount, item_count, remark, status, created_at
           FROM orders
@@ -43,6 +44,7 @@
          ORDER BY id ASC
     </select>
 
+    <!-- 状态更新只改 status；合法性已由 OrderService 的状态机校验 -->
     <update id="updateStatus">
         UPDATE orders
            SET status = #{status}

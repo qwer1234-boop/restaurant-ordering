@@ -23,12 +23,13 @@ import java.util.Random;
 import java.util.Set;
 
 /**
- * 订单业务：下单、查询、状态流转
+ * 订单业务：下单、查询、状态流转。
  *
  * 关键设计：
  * 1. 下单过程使用 @Transactional 事务，订单主表、订单明细、菜品库存销量三步要么全成功要么全回滚；
  * 2. 金额一律以数据库中的菜品单价计算，不信任前端传入的价格；
- * 3. 订单明细保存菜品名称与价格快照，菜品后续改名改价不影响历史订单。
+ * 3. 订单明细保存菜品名称与价格快照，菜品后续改名改价不影响历史订单；
+ * 4. 状态流转由 TRANSITIONS 状态机统一约束，取消订单时回滚库存与销量。
  */
 @Service
 @RequiredArgsConstructor
@@ -64,7 +65,16 @@ public class OrderService {
     }
 
     /**
-     * 提交订单（事务方法）
+     * 提交订单（事务方法）。
+     *
+     * 执行顺序：
+     * 1. 校验桌号是否存在；
+     * 2. 逐条校验菜品（存在、在售、库存足够），用数据库价格计算小计；
+     * 3. 写订单主表，回填自增 id；
+     * 4. 写订单明细，同时扣库存、加销量；
+     * 5. 刷新餐桌占用状态。
+     *
+     * 任意一步失败都会回滚，避免出现“订单生成了但库存没扣”的中间状态。
      */
     @Transactional(rollbackFor = Exception.class)
     public Order createOrder(OrderCreateDTO dto) {
@@ -138,7 +148,10 @@ public class OrderService {
         return order;
     }
 
-    /** 查询订单列表（含明细） */
+    /**
+     * 查询订单列表（含明细）。
+     * limit 为空或非法时默认 20 条，最多 100 条，避免一次查太多。
+     */
     public List<Order> listOrders(String status, Integer limit) {
         int size = (limit == null || limit <= 0) ? 20 : Math.min(limit, 100);
         List<Order> orders = orderMapper.selectOrders(status, size);
@@ -149,8 +162,14 @@ public class OrderService {
     }
 
     /**
-     * 更新订单状态
-     * 取消订单时回退库存与销量；完成或取消后重算餐桌状态
+     * 更新订单状态。
+     *
+     * 状态机：
+     *   待处理 → 制作中 → 已完成
+     *   待处理 / 制作中 → 已取消
+     *
+     * 取消订单时，在同一事务里按订单明细逐条回退库存、回减销量；
+     * 完成或取消后，重新计算餐桌是否还被其他活动订单占用。
      */
     @Transactional(rollbackFor = Exception.class)
     public Order updateStatus(String orderNo, String status) {
@@ -167,14 +186,17 @@ public class OrderService {
             throw new BizException("订单状态不能从「" + order.getStatus() + "」变为「" + status + "」");
         }
 
+        // 先改状态，再处理取消订单的库存回退；两步在同一个事务里。
         orderMapper.updateStatus(order.getId(), status);
 
         if (STATUS_CANCELLED.equals(status)) {
+            // 取消：按明细逐条把库存加回来、销量减回去。
             for (OrderItem item : orderMapper.selectItemsByOrderId(order.getId())) {
                 menuMapper.rollbackSalesAndStock(item.getDishId(), item.getCount());
             }
         }
         if (STATUS_DONE.equals(status) || STATUS_CANCELLED.equals(status)) {
+            // 订单结束后，重新判断这张桌是否还有别的活动订单。
             tableMapper.refreshStatusByActiveOrders(order.getTableNo());
         }
 

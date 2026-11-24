@@ -49,10 +49,12 @@ Page({
     if (this.data.isOwner) this.loadAll();
   },
 
+  // 订单看板和统计一起刷新，减少页面上的等待空白
   loadAll() {
     return Promise.all([this.loadOrders(), this.loadStats()]);
   },
 
+  // 拉取订单并把后端字段转换成页面使用的结构
   loadOrders() {
     return api.ownerGetOrders(100)
       .then(list => {
@@ -79,6 +81,7 @@ Page({
       });
   },
 
+  // 统计和订单相互独立，统计失败不阻塞订单看板
   loadStats() {
     return api.ownerGetStats()
       .then(d => {
@@ -91,6 +94,7 @@ Page({
       .catch(err => this.handleAuthError(err));
   },
 
+  // 统一处理 401：清掉本地 token 并回登录页；其他错误只 toast
   handleAuthError(err) {
     if (err && (err.statusCode === 401 || err.code === 401)) {
       app.clearOwnerSession();
@@ -106,6 +110,7 @@ Page({
     this.applyFilter();
   },
 
+  // 前端筛选只影响当前展示，不重新请求后端
   applyFilter() {
     const { activeTab, orders } = this.data;
     let filtered = orders;
@@ -137,6 +142,7 @@ Page({
     });
   },
 
+  // 接单/出餐/取消成功后重新拉取订单和统计，保证看板与数据库一致
   doUpdate(orderNo, status, actionText) {
     api.ownerUpdateOrderStatus(orderNo, status)
       .then(() => {
